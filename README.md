@@ -1,22 +1,32 @@
 # Renta Testa - Plataforma E-Commerce Industrial
 
 ## Descripción del Proyecto
-Renta Testa es una plataforma integral de comercio electrónico diseñada para la gestión operativa de arriendos de maquinaria pesada y la venta de materiales de construcción. Este proyecto fue desarrollado como evaluación práctica integral para la asignatura de Desarrollo Backend y Frontend, demostrando la implementación de arquitecturas escalables, reglas de negocio complejas y el consumo de APIs RESTful.
+Renta Testa es una plataforma integral de comercio electrónico diseñada para la gestión operativa de arriendos de maquinaria pesada y la venta de materiales de construcción. Este proyecto fue desarrollado como evaluación práctica integral para la asignatura de Desarrollo Backend y Frontend, demostrando la implementación de arquitecturas escalables, reglas de negocio complejas, transacciones seguras y el consumo de APIs RESTful.
 
 ## Tecnologías y Arquitectura
 - **Backend:** Python, Django, Django REST Framework.
-- **Autenticación:** JSON Web Tokens (JWT) gestionado a través de SimpleJWT.
+- **Autenticación:** JSON Web Tokens (JWT) mediante SimpleJWT con expiración dinámica por Roles.
 - **Frontend:** HTML5, Vanilla JavaScript (ES6+), Tailwind CSS (v3).
 - **Base de Datos:** PostgreSQL (Sistema Relacional Principal).
+- **Seguridad:** Variables de entorno (`python-dotenv`) para protección de credenciales y llaves secretas.
 - **Documentación de API:** drf-spectacular (OpenAPI / Swagger UI).
 - **Procesamiento de Archivos:** Pillow (Para carga estructurada de recursos multimedia).
 
 ## Características Principales
-- **Panel de Administración (Dashboard):** Sistema CRUD protegido por roles de usuario para gestionar el inventario de maquinaria, materiales, servicios externos y configuración de la interfaz.
-- **Lógica de Cotización Avanzada:** Cálculo dinámico de contratos de arriendo que considera tarifas diarias, factores de uso técnico, restricciones de fechas (máximo 21 días), costos logísticos por zona geográfica (Norte, Central, Sur) y retención de garantías.
-- **Carro de Compras Dinámico:** Integración asíncrona que permite gestionar compras de materiales y reservas de maquinaria en una sola sesión, aplicando reglas de negocio automatizadas (ej. descuentos por volumen).
-- **Control de Acceso (RBAC):** Separación estricta de privilegios entre perfiles de "Cliente" (cotización y reservas) y "Ejecutivo" (administración total de la plataforma).
-- **Interactividad Asíncrona:** Consumo de la API REST mediante Fetch API para actualizaciones de estado, validación de formularios y carga de archivos binarios (FormData) sin recarga de la página.
+
+- **Procesamiento de Checkout y Gestión de Stock (Transaccionalidad):** 
+  Flujo de compras real. Cuando un usuario finaliza el pago, el backend utiliza `@transaction.atomic` de Django para bloquear la base de datos, validar stock, descontar el inventario físico en tiempo real, crear el registro histórico del contrato y vaciar el carrito. Todo esto previene compras simultáneas de ítems agotados (condiciones de carrera).
+
+- **Seguridad Dinámica JWT por Roles (RBAC):** 
+  El sistema de inicio de sesión analiza el rol del usuario que solicita acceso:
+  - **Ejecutivos (Admins):** Se emite un Token con una expiración estricta de **2 minutos** para proteger la administración del inventario contra abandono de sesión.
+  - **Clientes:** Se emite un Token con una duración extendida de **24 horas**, priorizando una experiencia de compra fluida y sin interrupciones.
+
+- **Panel de Administración (Dashboard):** 
+  Sistema CRUD protegido para gestionar el inventario de maquinaria, materiales, servicios externos y configuración dinámica de la interfaz web, incluyendo soporte completo para subida de imágenes (FormData).
+
+- **Código Estructurado y Altamente Documentado:** 
+  Las reglas de negocio (Modelos) y los controladores (Vistas API) cuentan con exhaustiva documentación y comentarios en el código fuente (explicando relaciones OneToOne, properties matemáticas, transacciones y lógica de roles), pensado para facilitar el análisis académico y escalabilidad futura.
 
 ## Instalación y Despliegue Local
 
@@ -29,7 +39,7 @@ Renta Testa es una plataforma integral de comercio electrónico diseñada para l
    ```bash
    python -m venv venv
    # En Windows:
-   .\venv\Scripts\activate
+   .env\Scriptsctivate
    # En Linux/Mac:
    source venv/bin/activate
    ```
@@ -39,12 +49,16 @@ Renta Testa es una plataforma integral de comercio electrónico diseñada para l
    pip install -r requirements.txt
    ```
 
-4. Aplicar las migraciones a la base de datos:
+4. Configurar Variables de Entorno:
+   - Copiar el archivo `.env.example` y renombrarlo a `.env`.
+   - Modificar las credenciales dentro del archivo `.env` con los datos de tu conexión local a PostgreSQL y definir una `SECRET_KEY`.
+
+5. Aplicar las migraciones a la base de datos:
    ```bash
    python manage.py migrate
    ```
 
-5. Iniciar el servidor de desarrollo:
+6. Iniciar el servidor de desarrollo:
    ```bash
    python manage.py runserver
    ```
