@@ -3,11 +3,20 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Maquinaria, Carro, ItemCarro, Contrato, ItemContrato
 
+from datetime import timedelta
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token['rol'] = user.rol
+        
+        # Lógica de seguridad: Diferenciar tiempo de expiración según el rol
+        if user.rol == 'EJECUTIVO':
+            token.set_exp(lifetime=timedelta(minutes=2)) # Superusuarios: 2 min
+        else:
+            token.set_exp(lifetime=timedelta(hours=24)) # Clientes: 24 hrs
+            
         return token
 
     def validate(self, attrs):

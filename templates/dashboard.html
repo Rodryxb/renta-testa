@@ -187,7 +187,7 @@
             loadServicios();
             loadBanner();
         } else {
-            window.location.href = '/auth/';
+            window.location.href = '/auth/?expired=true';
         }
     });
 
@@ -293,7 +293,13 @@
         
         const method = id ? 'PUT' : 'POST';
         const url = id ? `/api/maquinarias/${id}/` : '/api/maquinarias/';
-        await fetch(url, { method: method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+        const res = await fetch(url, { method: method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+        if(res.status === 401) {
+            
+            localStorage.clear();
+            window.location.href = '/auth/?expired=true';
+            return;
+        }
         closeModalMaq(); loadData();
     }
 
@@ -315,7 +321,13 @@
 
     async function deleteMaquinaria(id) {
         if(confirm('¿Seguro que deseas eliminar este ítem del catálogo?')) { 
-            await fetch(`/api/maquinarias/${id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }}); 
+            const res = await fetch(`/api/maquinarias/${id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+        if(res.status === 401) {
+            
+            localStorage.clear();
+            window.location.href = '/auth/?expired=true';
+            return;
+        }
             loadData(); 
         }
     }

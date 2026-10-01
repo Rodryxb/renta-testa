@@ -11,6 +11,7 @@
     <!-- Formulario Login -->
     <div id="form-login" class="block">
         <h2 class="text-2xl font-bold mb-6 text-center">Bienvenido a Renta Testa</h2>
+        <div id="expired-msg" class="hidden bg-orange-100 text-orange-700 p-3 rounded mb-4 text-sm font-bold border-l-4 border-orange-500"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.</div>
         <div id="login-error" class="hidden bg-red-100 text-red-600 p-3 rounded mb-4 text-sm font-medium"></div>
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="mb-4">
@@ -111,6 +112,7 @@
             if(response.ok) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('user_rol', data.rol);
+                localStorage.setItem('user_email', email);
                 if(data.rol === 'EJECUTIVO') {
                     window.location.href = '/dashboard/';
                 } else {

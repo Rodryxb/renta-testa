@@ -93,6 +93,9 @@
                 }
 
                 
+                const userEmail = localStorage.getItem('user_email') || '';
+                const emailDisplay = userEmail ? `<span class="text-xs text-gray-400 font-normal ml-1">(${userEmail})</span>` : '';
+                
                 container.innerHTML = `
                     ${adminBtn}
                     <a href="/carro/" class="text-white hover:text-brandYellow transition font-medium mr-6 relative group" title="Mi Carrito">
@@ -102,7 +105,7 @@
                     
                     <div class="relative group cursor-pointer mr-2" onclick="toggleUserMenu()">
                         <div class="flex items-center gap-2 text-white hover:text-brandYellow transition font-medium">
-                            <span class="font-bold">Mi cuenta</span>
+                            <span class="font-bold flex items-center">Mi cuenta ${emailDisplay}</span>
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </div>
                         

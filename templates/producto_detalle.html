@@ -232,6 +232,7 @@
             body: JSON.stringify(payload)
         });
 
+        if(res.status === 401) { alert('⏳ Tu sesión ha expirado. Vuelve a iniciar sesión.'); localStorage.clear(); window.location.href = '/auth/?expired=true'; return; }
         if(res.ok) {
             showToast('Cotización agregada al carro exitosamente.');
             
@@ -288,6 +289,7 @@
             body: JSON.stringify(payload)
         });
 
+        if(res.status === 401) { alert('⏳ Tu sesión ha expirado. Vuelve a iniciar sesión.'); localStorage.clear(); window.location.href = '/auth/?expired=true'; return; }
         if(res.ok) {
             showToast('Material agregado a tu compra exitosamente.');
             

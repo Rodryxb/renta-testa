@@ -56,12 +56,94 @@
                     <span class="text-4xl font-extrabold text-green-600" id="resumen-total">$0</span>
                 </div>
 
-                <button onclick="procesarPago()" class="w-full bg-brandYellow text-brandBlack font-extrabold py-4 rounded-xl hover:bg-yellow-400 transition shadow-xl text-lg transform hover:-translate-y-1 mb-3">
+                <button onclick="abrirModalPago()" class="w-full bg-brandYellow text-brandBlack font-extrabold py-4 rounded-xl hover:bg-yellow-400 transition shadow-xl text-lg transform hover:-translate-y-1 mb-3">
                     <i class="fa-solid fa-credit-card mr-2"></i> IR A PAGAR
                 </button>
                 <p class="text-xs text-center text-gray-400"><i class="fa-solid fa-lock text-brandYellow"></i> Transacción 100% segura y encriptada.</p>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal de Pago y Facturación -->
+<div id="modal-pago" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div class="bg-brandBlack p-6 text-center">
+            <h3 class="text-2xl font-bold text-brandYellow"><i class="fa-solid fa-lock"></i> Pago Seguro</h3>
+        </div>
+        <form id="form-pago" onsubmit="confirmarPago(event)" class="p-6 space-y-4">
+            
+            <!-- Datos de Tarjeta -->
+            <div class="space-y-3">
+                <h4 class="font-bold text-gray-700 border-b pb-1">Datos de Tarjeta</h4>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600">Número de Tarjeta</label>
+                    <input type="text" id="pago-tarjeta" required minlength="16" maxlength="19" placeholder="1234 5678 9101 1121" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-1/2">
+                        <label class="block text-sm font-bold text-gray-600">Vencimiento</label>
+                        <input type="text" id="pago-venc" required placeholder="MM/YY" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-sm font-bold text-gray-600">CVV</label>
+                        <input type="text" id="pago-cvv" required minlength="3" maxlength="4" placeholder="123" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600">Nombre en la tarjeta</label>
+                    <input type="text" id="pago-nombre" required placeholder="Ej. Juan Pérez" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600">Cuotas</label>
+                    <select id="pago-cuotas" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                        <option value="1">1 Cuota (Sin Interés)</option>
+                        <option value="3">3 Cuotas (Sin Interés)</option>
+                        <option value="6">6 Cuotas</option>
+                        <option value="12">12 Cuotas</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Facturación -->
+            <div class="space-y-3 pt-2">
+                <h4 class="font-bold text-gray-700 border-b pb-1">Documento Tributario</h4>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600">Tipo de Documento</label>
+                    <select id="pago-tipo-doc" onchange="toggleFactura()" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                        <option value="BOLETA">Boleta Electrónica</option>
+                        <option value="FACTURA">Factura Comercial</option>
+                    </select>
+                </div>
+                <div id="div-rut-factura" class="hidden">
+                    <label class="block text-sm font-bold text-gray-600">RUT Empresa</label>
+                    <input type="text" id="pago-rut" placeholder="Ej. 76.123.456-K" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-brandYellow">
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="button" onclick="cerrarModalPago()" class="w-1/2 bg-gray-200 text-gray-800 font-bold py-3 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                <button type="submit" class="w-1/2 bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition shadow-lg"><i class="fa-solid fa-check"></i> Procesar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Factura/Boleta de Éxito -->
+<div id="modal-factura" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md p-8 text-center border-t-8 border-green-500">
+        <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
+        <h2 class="text-2xl font-black text-brandBlack mb-2">¡Pago Exitoso!</h2>
+        <p class="text-gray-600 mb-6">Tu orden se ha generado y procesado correctamente en nuestra base de datos.</p>
+        
+        <div class="bg-gray-50 p-4 rounded text-left text-sm space-y-2 mb-6 border">
+            <p><strong>N° Orden:</strong> <span id="factura-nro"></span></p>
+            <p><strong>Tipo Doc:</strong> <span id="factura-tipo"></span></p>
+            <p><strong>Total Pagado:</strong> <span id="factura-total" class="text-green-600 font-bold"></span></p>
+            <p><strong>Cuotas:</strong> <span id="factura-cuotas"></span></p>
+        </div>
+
+        <button onclick="window.location.href='/carro/'" class="w-full bg-brandBlack text-brandYellow font-bold py-3 rounded-lg hover:bg-gray-900 transition shadow-lg">Finalizar</button>
     </div>
 </div>
 
@@ -234,13 +316,86 @@
         }
     }
 
-    function procesarPago() {
+    function abrirModalPago() {
         const total = document.getElementById('resumen-total').innerText;
         if(total === '$0') {
             alert('Tu carro está vacío.');
             return;
         }
-        alert('Simulación de Checkout Exitoso. \nRedirigiendo a Webpay Plus...');
+        document.getElementById('modal-pago').classList.remove('hidden');
+    }
+
+    function cerrarModalPago() {
+        document.getElementById('modal-pago').classList.add('hidden');
+    }
+
+    function toggleFactura() {
+        const tipo = document.getElementById('pago-tipo-doc').value;
+        const rutDiv = document.getElementById('div-rut-factura');
+        if(tipo === 'FACTURA') {
+            rutDiv.classList.remove('hidden');
+            document.getElementById('pago-rut').required = true;
+        } else {
+            rutDiv.classList.add('hidden');
+            document.getElementById('pago-rut').required = false;
+        }
+    }
+
+    async function confirmarPago(e) {
+        e.preventDefault();
+        
+        // Simular validación básica de la tarjeta localmente
+        const tarjeta = document.getElementById('pago-tarjeta').value;
+        const cvv = document.getElementById('pago-cvv').value;
+        
+        if(tarjeta.length < 15 || cvv.length < 3) {
+            alert("Los datos de la tarjeta son inválidos.");
+            return;
+        }
+
+        const token = localStorage.getItem('access_token');
+        if(!token) return;
+
+        // Llamar a nuestro endpoint REAL de checkout
+        try {
+            const res = await fetch('/api/checkout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    tarjeta: tarjeta,
+                    cvv: cvv
+                })
+            });
+
+            const data = await res.json();
+
+            if(res.ok) {
+                // Cerrar modal pago
+                cerrarModalPago();
+                
+                // Mostrar Factura/Boleta de éxito
+                document.getElementById('factura-nro').innerText = '0000' + data.id; // Asumiendo que retorna la orden
+                document.getElementById('factura-tipo').innerText = document.getElementById('pago-tipo-doc').value;
+                document.getElementById('factura-total').innerText = document.getElementById('resumen-total').innerText;
+                document.getElementById('factura-cuotas').innerText = document.getElementById('pago-cuotas').value;
+                
+                document.getElementById('modal-factura').classList.remove('hidden');
+                
+                // Actualizar burbuja global a 0
+                const badge = document.getElementById('global-cart-badge');
+                if(badge) {
+                    badge.innerText = '0';
+                    badge.classList.add('hidden');
+                }
+            } else {
+                alert(data.error || 'Ocurrió un error al procesar el pago.');
+            }
+        } catch(error) {
+            alert('Error de conexión.');
+        }
     }
 </script>
 {% endblock %}
