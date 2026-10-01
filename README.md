@@ -7,7 +7,7 @@ Renta Testa es una plataforma integral de comercio electrónico diseñada para l
 - **Backend:** Python, Django, Django REST Framework.
 - **Autenticación:** JSON Web Tokens (JWT) gestionado a través de SimpleJWT.
 - **Frontend:** HTML5, Vanilla JavaScript (ES6+), Tailwind CSS (v3).
-- **Base de Datos:** SQLite3 (Entorno de desarrollo).
+- **Base de Datos:** PostgreSQL (Sistema Relacional Principal).
 - **Documentación de API:** drf-spectacular (OpenAPI / Swagger UI).
 - **Procesamiento de Archivos:** Pillow (Para carga estructurada de recursos multimedia).
 
