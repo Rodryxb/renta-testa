@@ -25,3 +25,6 @@ Thumbs.db
 # Configuración del editor de código
 .vscode/
 .idea/
+
+# Respaldos de Base de Datos
+datos_respaldo.json
