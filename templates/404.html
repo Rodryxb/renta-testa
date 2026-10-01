@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex-grow flex items-center justify-center py-20 px-4 bg-white">
+    <div class="max-w-lg w-full text-center bg-gray-50 p-10 rounded-3xl shadow-xl border border-gray-200">
+        <i class="fa-solid fa-road-barrier text-7xl text-brandYellow mb-6 drop-shadow-md"></i>
+        <h1 class="text-7xl font-extrabold text-brandBlack mb-2 tracking-tighter">404</h1>
+        <h2 class="text-2xl font-bold text-gray-700 mb-4 uppercase">Sitio no encontrado</h2>
+        <div class="w-16 h-1 bg-brandYellow mx-auto mb-6"></div>
+        <p class="text-gray-500 mb-8 leading-relaxed text-sm">Parece que te has perdido fuera de la obra. La página a la que intentas acceder no existe, fue movida a otra sección o se encuentra en mantenimiento.</p>
+        <a href="/" class="inline-block bg-brandBlack text-white font-bold px-8 py-4 rounded-full hover:bg-gray-800 transition shadow-lg w-full md:w-auto transform hover:-translate-y-1">
+            <i class="fa-solid fa-house mr-2 text-brandYellow"></i> Volver al Inicio Seguro
+        </a>
+    </div>
+</div>
+{% endblock %}

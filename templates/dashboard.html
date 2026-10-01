@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-10" id="dashboard-content" style="display:none;">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-brandBlack">Panel de Administración Avanzado</h1>
+            <p class="text-gray-500">Gestión de Catálogo y Especialistas Externos.</p>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex space-x-4 border-b border-gray-200 mb-8 overflow-x-auto">
+        <button onclick="switchTab('maquinas')" id="tab-maquinas" class="py-2 px-4 border-b-2 border-brandYellow font-bold text-brandBlack transition whitespace-nowrap">Maquinarias (Arriendo)</button>
+        <button onclick="switchTab('materiales')" id="tab-materiales" class="py-2 px-4 border-b-2 border-transparent font-bold text-gray-400 hover:text-brandBlack transition whitespace-nowrap">Materiales (Venta)</button>
+        <button onclick="switchTab('banner')" id="tab-banner" class="py-2 px-4 border-b-2 border-transparent font-bold text-gray-400 hover:text-brandBlack transition whitespace-nowrap">Configuración Portada</button>
+        <button onclick="switchTab('servicios')" id="tab-servicios" class="py-2 px-4 border-b-2 border-transparent font-bold text-gray-400 hover:text-brandBlack transition whitespace-nowrap">Especialistas (Servicios)</button>
+    </div>
+
+    <!-- SECCION MAQUINARIAS -->
+    <div id="seccion-maquinas">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-brandBlack"><i class="fa-solid fa-truck-ramp-box text-brandYellow mr-2"></i> Flota de Maquinarias</h2>
+            <button onclick="openModalMaq('MAQUINARIA')" class="bg-brandBlack text-brandYellow px-6 py-2 rounded-md font-bold hover:bg-gray-900 shadow-md">
+                <i class="fa-solid fa-plus"></i> Nueva Maquinaria
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg overflow-x-auto border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-brandBlack text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Nombre</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Categoría</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Tarifa Diaria</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Garantía Fija</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Stock</th>
+                        <th class="px-6 py-4 text-right text-xs font-bold uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="table-body-maq"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECCION MATERIALES -->
+    <div id="seccion-materiales" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-brandBlack"><i class="fa-solid fa-cubes text-brandYellow mr-2"></i> Inventario de Materiales</h2>
+            <button onclick="openModalMaq('MATERIAL')" class="bg-brandBlack text-brandYellow px-6 py-2 rounded-md font-bold hover:bg-gray-900 shadow-md">
+                <i class="fa-solid fa-plus"></i> Nuevo Material
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg overflow-x-auto border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-brandBlack text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Nombre</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Categoría</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Precio Unitario</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Stock</th>
+                        <th class="px-6 py-4 text-right text-xs font-bold uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="table-body-mat"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECCION BANNER -->
+    <div id="seccion-banner" class="hidden">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 max-w-2xl mx-auto mt-8">
+            <h2 class="text-2xl font-bold mb-6 border-b pb-2"><i class="fa-solid fa-image text-brandYellow mr-2"></i> Configuración Portada (Banner)</h2>
+            <form id="form-banner" onsubmit="saveBanner(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">URL de la Imagen (Resolución ideal: 1200x400)</label>
+                    <input type="url" id="config-banner-url" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-brandYellow" placeholder="https://ejemplo.com/banner.jpg">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Texto Alternativo del Banner (Si no hay foto)</label>
+                    <input type="text" id="config-banner-titulo" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-brandYellow">
+                </div>
+                <button type="submit" class="w-full bg-brandYellow text-brandBlack font-bold py-3 rounded-lg hover:bg-yellow-400 transition shadow-lg text-lg">Guardar Configuración de Portada</button>
+            </form>
+            <p id="banner-msg" class="text-green-600 font-bold mt-4 hidden text-center">¡Configuración guardada exitosamente!</p>
+        </div>
+    </div>
+
+    <!-- SECCION SERVICIOS -->
+    <div id="seccion-servicios" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-brandBlack"><i class="fa-solid fa-users-gear text-brandYellow mr-2"></i> Especialistas INACAP</h2>
+            <button onclick="openModalServ()" class="bg-brandBlack text-brandYellow px-6 py-2 rounded-md font-bold hover:bg-gray-900 shadow-md">
+                <i class="fa-solid fa-user-plus"></i> Nuevo Especialista
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg overflow-x-auto border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-brandBlack text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Especialista</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Título INACAP</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase">Servicio Ofrecido</th>
+                        <th class="px-6 py-4 text-right text-xs font-bold uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="table-body-serv"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Compartido para Maquinarias y Materiales -->
+<div id="crud-modal-maq" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-brandBlack" id="modal-title-maq">Nuevo Producto</h3>
+            <button onclick="closeModalMaq()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <form id="crud-form-maq" onsubmit="saveMaquinaria(event)">
+            <input type="hidden" id="maq-id">
+            <!-- Hidden input para controlar el tipo de forma estricta -->
+            <input type="hidden" id="maq-tipo">
+            
+            <div class="mb-3">
+                <label class="block text-sm font-bold text-gray-700">Categoría</label>
+                <input type="text" id="maq-categoria" required class="w-full px-3 py-2 border rounded focus:ring-brandYellow" placeholder="Ej: Movimiento de Tierra / Áridos">
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-bold text-gray-700">Nombre del Producto</label>
+                <input type="text" id="maq-nombre" required class="w-full px-3 py-2 border rounded focus:ring-brandYellow">
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-bold text-gray-700">Subir Imagen (PNG/JPG)</label>
+                <input type="file" id="maq-img-upload" accept="image/png, image/jpeg" class="w-full px-3 py-2 border rounded focus:ring-brandYellow">
+            </div>
+            <div class="flex gap-3 mb-3">
+                <div class="w-1/2">
+                    <label class="block text-xs font-bold text-gray-700" id="lbl-tarifa">Tarifa/Precio</label>
+                    <input type="number" id="maq-tarifa" required class="w-full px-3 py-2 border rounded focus:ring-brandYellow">
+                </div>
+                <div class="w-1/2" id="container-garantia">
+                    <label class="block text-xs font-bold text-gray-700">Garantía Fija (Arriendo)</label>
+                    <input type="number" id="maq-garantia" class="w-full px-3 py-2 border rounded focus:ring-brandYellow">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="block text-xs font-bold text-gray-700">Stock Físico (Unidades)</label>
+                <input type="number" id="maq-stock" required class="w-full px-3 py-2 border rounded focus:ring-brandYellow">
+            </div>
+            <button type="submit" class="w-full bg-brandYellow text-brandBlack font-bold py-3 rounded-md mt-4 hover:bg-yellow-400">Guardar Producto</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Especialistas (Intacto) -->
+<div id="crud-modal-serv" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold" id="modal-title-serv">Nuevo Especialista</h3>
+            <button onclick="closeModalServ()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <form id="crud-form-serv" onsubmit="saveServicio(event)">
+            <input type="hidden" id="serv-id">
+            <div class="mb-3"><label class="block text-sm font-bold">Título del Servicio</label><input type="text" id="serv-titulo" required class="w-full px-3 py-2 border rounded"></div>
+            <div class="mb-3"><label class="block text-sm font-bold">Descripción</label><textarea id="serv-desc" required class="w-full px-3 py-2 border rounded" rows="2"></textarea></div>
+            <div class="flex gap-3 mb-3">
+                <div class="w-1/2"><label class="block text-sm font-bold">Encargado</label><input type="text" id="serv-nombre" required class="w-full px-3 py-2 border rounded"></div>
+                <div class="w-1/2"><label class="block text-sm font-bold">Título INACAP</label><input type="text" id="serv-titulou" required class="w-full px-3 py-2 border rounded"></div>
+            </div>
+            <div class="flex gap-3 mb-3">
+                <div class="w-1/2"><label class="block text-sm font-bold">Teléfono</label><input type="text" id="serv-tel" required class="w-full px-3 py-2 border rounded"></div>
+                <div class="w-1/2"><label class="block text-sm font-bold">Horarios</label><input type="text" id="serv-horario" required class="w-full px-3 py-2 border rounded"></div>
+            </div>
+            <div class="mb-3"><label class="block text-sm font-bold">Subir Foto (PNG/JPG)</label><input type="file" id="serv-img-upload" accept="image/png, image/jpeg" class="w-full px-3 py-2 border rounded"></div>
+            <button type="submit" class="w-full bg-brandYellow text-brandBlack font-bold py-3 rounded-md mt-4 hover:bg-yellow-400">Guardar Especialista</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('access_token');
+    const rol = localStorage.getItem('user_rol');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if(token && rol === 'EJECUTIVO') {
+            document.getElementById('dashboard-content').style.display = 'block';
+            loadData();
+            loadServicios();
+            loadBanner();
+        } else {
+            window.location.href = '/auth/';
+        }
+    });
+
+    function switchTab(tab) {
+        ['maquinas', 'materiales', 'banner', 'servicios'].forEach(t => {
+            const sec = document.getElementById('seccion-' + t);
+            const btn = document.getElementById('tab-' + t);
+            if(sec) {
+                if(t === tab) {
+                    sec.classList.remove('hidden');
+                    btn.classList.add('border-brandYellow', 'text-brandBlack');
+                    btn.classList.remove('border-transparent', 'text-gray-400');
+                } else {
+                    sec.classList.add('hidden');
+                    btn.classList.add('border-transparent', 'text-gray-400');
+                    btn.classList.remove('border-brandYellow', 'text-brandBlack');
+                }
+            }
+        });
+    }
+
+    // --- CARGAR DATOS (MAQUINAS Y MATERIALES SEPARADOS) ---
+    async function loadData() {
+        const response = await fetch('/api/maquinarias/');
+        const data = await response.json();
+        
+        const tbodyMaq = document.getElementById('table-body-maq');
+        const tbodyMat = document.getElementById('table-body-mat');
+        tbodyMaq.innerHTML = '';
+        tbodyMat.innerHTML = '';
+        
+        data.forEach(m => {
+            if(m.tipo === 'MAQUINARIA') {
+                tbodyMaq.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-bold">${m.nombre}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${m.categoria}</td>
+                        <td class="px-6 py-4 text-sm text-green-600 font-bold">$${m.tarifa_diaria}/día</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-600">$${m.garantia}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-blue-600">${m.stock_disponible}</td>
+                        <td class="px-6 py-4 text-right text-sm">
+                            <button onclick="editMaquinaria(${m.id}, 'MAQUINARIA')" class="text-blue-600 mr-3"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteMaquinaria(${m.id})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            } else {
+                tbodyMat.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-bold">${m.nombre}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${m.categoria}</td>
+                        <td class="px-6 py-4 text-sm text-green-600 font-bold">$${m.tarifa_diaria} c/u</td>
+                        <td class="px-6 py-4 text-sm font-bold text-blue-600">${m.stock_disponible}</td>
+                        <td class="px-6 py-4 text-right text-sm">
+                            <button onclick="editMaquinaria(${m.id}, 'MATERIAL')" class="text-blue-600 mr-3"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteMaquinaria(${m.id})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }
+        });
+    }
+
+    // --- CRUD MAQUINARIAS / MATERIALES ---
+    function openModalMaq(tipo) {
+        document.getElementById('crud-form-maq').reset();
+        document.getElementById('maq-id').value = '';
+        document.getElementById('maq-tipo').value = tipo;
+        
+        if(tipo === 'MATERIAL') {
+            document.getElementById('modal-title-maq').innerText = 'Nuevo Material de Construcción';
+            document.getElementById('lbl-tarifa').innerText = 'Precio de Venta c/u';
+            document.getElementById('container-garantia').style.display = 'none';
+            document.getElementById('maq-garantia').value = 0;
+            document.getElementById('maq-garantia').removeAttribute('required');
+        } else {
+            document.getElementById('modal-title-maq').innerText = 'Nueva Maquinaria Pesada';
+            document.getElementById('lbl-tarifa').innerText = 'Tarifa Arriendo Diaria';
+            document.getElementById('container-garantia').style.display = 'block';
+            document.getElementById('maq-garantia').setAttribute('required', 'true');
+        }
+        
+        document.getElementById('crud-modal-maq').classList.remove('hidden');
+    }
+
+    function closeModalMaq() { document.getElementById('crud-modal-maq').classList.add('hidden'); }
+
+    async function saveMaquinaria(e) {
+        e.preventDefault();
+        const id = document.getElementById('maq-id').value;
+        const tipo = document.getElementById('maq-tipo').value;
+        
+        const formData = new FormData();
+        formData.append('tipo', tipo);
+        formData.append('nombre', document.getElementById('maq-nombre').value);
+        formData.append('categoria', document.getElementById('maq-categoria').value);
+        formData.append('tarifa_diaria', document.getElementById('maq-tarifa').value);
+        formData.append('garantia', tipo === 'MATERIAL' ? 0 : document.getElementById('maq-garantia').value);
+        formData.append('stock_disponible', document.getElementById('maq-stock').value);
+        
+        const fileInput = document.getElementById('maq-img-upload');
+        if(fileInput && fileInput.files[0]) {
+            formData.append('imagen_upload', fileInput.files[0]);
+        }
+        
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/maquinarias/${id}/` : '/api/maquinarias/';
+        await fetch(url, { method: method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+        closeModalMaq(); loadData();
+    }
+
+    async function editMaquinaria(id, tipo) {
+        const response = await fetch(`/api/maquinarias/${id}/`);
+        const m = await response.json();
+        
+        openModalMaq(tipo); // Preconfigura los campos visualmente
+        document.getElementById('modal-title-maq').innerText = tipo === 'MATERIAL' ? 'Editar Material' : 'Editar Maquinaria';
+        
+        document.getElementById('maq-id').value = m.id;
+        document.getElementById('maq-nombre').value = m.nombre;
+        document.getElementById('maq-categoria').value = m.categoria;
+        document.getElementById('maq-tarifa').value = m.tarifa_diaria;
+        document.getElementById('maq-garantia').value = m.garantia;
+        document.getElementById('maq-stock').value = m.stock_disponible;
+        if(document.getElementById('maq-img-upload')) document.getElementById('maq-img-upload').value = '';
+    }
+
+    async function deleteMaquinaria(id) {
+        if(confirm('¿Seguro que deseas eliminar este ítem del catálogo?')) { 
+            await fetch(`/api/maquinarias/${id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }}); 
+            loadData(); 
+        }
+    }
+
+    // --- BANNER ---
+    async function loadBanner() {
+        const res = await fetch('/api/configuracion/');
+        const data = await res.json();
+        document.getElementById('config-banner-url').value = data.banner_url || '';
+        document.getElementById('config-banner-titulo').value = data.titulo_banner || '';
+    }
+    async function saveBanner(e) {
+        e.preventDefault();
+        const payload = {
+            banner_url: document.getElementById('config-banner-url').value,
+            titulo_banner: document.getElementById('config-banner-titulo').value
+        };
+        const res = await fetch('/api/configuracion/', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        if(res.ok) {
+            const msg = document.getElementById('banner-msg');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 3000);
+        }
+    }
+
+    // --- SERVICIOS ---
+    async function loadServicios() {
+        const response = await fetch('/api/servicios/');
+        const data = await response.json();
+        const tbody = document.getElementById('table-body-serv');
+        tbody.innerHTML = '';
+        data.forEach(s => {
+            tbody.innerHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm font-bold flex items-center gap-3">
+                        <img src="${(s.foto_final || s.foto_url)}" class="w-8 h-8 rounded-full object-cover">
+                        ${s.nombre_encargado}
+                    </td>
+                    <td class="px-6 py-4 text-sm"><span class="bg-brandBlack text-brandYellow text-xs px-2 py-1 rounded">${s.titulo_universitario}</span></td>
+                    <td class="px-6 py-4 text-sm">${s.titulo}</td>
+                    <td class="px-6 py-4 text-right text-sm">
+                        <button onclick="editServicio(${s.id})" class="text-blue-600 mr-3"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteServicio(${s.id})" class="text-red-600"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+    }
+    function openModalServ() {
+        document.getElementById('crud-form-serv').reset();
+        document.getElementById('serv-id').value = '';
+        document.getElementById('modal-title-serv').innerText = 'Nuevo Especialista';
+        document.getElementById('crud-modal-serv').classList.remove('hidden');
+    }
+    function closeModalServ() { document.getElementById('crud-modal-serv').classList.add('hidden'); }
+    async function saveServicio(e) {
+        e.preventDefault();
+        const id = document.getElementById('serv-id').value;
+        const payload = {
+            titulo: document.getElementById('serv-titulo').value,
+            descripcion: document.getElementById('serv-desc').value,
+            nombre_encargado: document.getElementById('serv-nombre').value,
+            titulo_universitario: document.getElementById('serv-titulou').value,
+            telefono: document.getElementById('serv-tel').value,
+            horario: document.getElementById('serv-horario').value,
+            foto_url: document.getElementById('serv-img-url').value
+        };
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/servicios/${id}/` : '/api/servicios/';
+        await fetch(url, { method: method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+        closeModalServ(); loadServicios();
+    }
+    async function editServicio(id) {
+        const response = await fetch(`/api/servicios/${id}/`);
+        const s = await response.json();
+        document.getElementById('serv-id').value = s.id;
+        document.getElementById('serv-titulo').value = s.titulo;
+        document.getElementById('serv-desc').value = s.descripcion;
+        document.getElementById('serv-nombre').value = s.nombre_encargado;
+        document.getElementById('serv-titulou').value = s.titulo_universitario;
+        document.getElementById('serv-tel').value = s.telefono;
+        document.getElementById('serv-horario').value = s.horario;
+        document.getElementById('serv-img-url').value = (s.foto_final || s.foto_url);
+        document.getElementById('modal-title-serv').innerText = 'Editar Especialista';
+        document.getElementById('crud-modal-serv').classList.remove('hidden');
+    }
+    async function deleteServicio(id) {
+        if(confirm('¿Eliminar especialista?')) { await fetch(`/api/servicios/${id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }}); loadServicios(); }
+    }
+</script>
+{% endblock %}

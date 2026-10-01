@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold text-brandBlack mb-4">Servicios Técnicos Especializados y Consultoría en Obra</h2>
+        <p class="text-gray-500 text-lg max-w-3xl mx-auto">Conectamos tu proyecto con especialistas certificados. Cotiza y coordina directamente con el profesional a cargo.</p>
+        <div class="mt-6 flex justify-center">
+            <span class="bg-gray-50 text-gray-600 text-sm font-bold px-5 py-2 rounded-full border border-gray-200 shadow-sm">
+                <i class="fa-solid fa-handshake mr-2 text-brandYellow"></i> Trato directo con Especialistas INACAP
+            </span>
+        </div>
+    </div>
+
+    <!-- Grid de Servicios Dinámicos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="servicios-grid">
+        <!-- JS inyecta las cards aquí -->
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadServicios);
+
+    async function loadServicios() {
+        const res = await fetch('/api/servicios/');
+        const data = await res.json();
+        const grid = document.getElementById('servicios-grid');
+        grid.innerHTML = '';
+        
+        data.forEach(item => {
+            const foto = (item.foto_final || item.foto_url) || 'https://via.placeholder.com/150?text=Perfil';
+            const icon = getIcono(item.titulo);
+            
+            grid.innerHTML += `
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1 flex flex-col">
+                <div class="p-8 flex-grow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
+                            <i class="fa-solid ${icon} text-2xl text-brandBlack"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-brandBlack mb-4">${item.titulo}</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-6">${item.descripcion}</p>
+                    
+                    <!-- Tarjeta del Profesional -->
+                    <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
+                        <img src="${foto}" alt="${item.nombre_encargado}" class="w-16 h-16 rounded-full object-cover border-2 border-brandYellow shadow-sm">
+                        <div>
+                            <p class="font-bold text-lg text-brandBlack">${item.nombre_encargado}</p>
+                            <p class="text-xs font-bold text-brandYellow bg-brandBlack px-2 py-1 rounded inline-block uppercase tracking-wider">${item.titulo_universitario}</p>
+                        </div>
+                    </div>
+
+                    <!-- Datos de Contacto -->
+                    <div class="text-sm text-gray-500 space-y-2 font-medium">
+                        <p><i class="fa-solid fa-clock text-brandYellow w-5"></i> Disponibilidad: ${item.horario}</p>
+                        <p><i class="fa-solid fa-phone text-brandYellow w-5"></i> Contacto: ${item.telefono}</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-5 border-t border-gray-200 flex justify-between gap-4">
+                    <a href="mailto:contacto@rentatesta.cl?subject=Consulta%20a%20${encodeURIComponent(item.nombre_encargado)}" class="w-1/2 flex items-center justify-center bg-white border-2 border-brandBlack text-brandBlack font-bold py-3 rounded-lg hover:bg-brandBlack hover:text-white transition">
+                        <i class="fa-solid fa-envelope mr-2"></i> Correo
+                    </a>
+                    <a href="https://wa.me/${item.telefono.replace(/\s+/g, '')}" target="_blank" class="w-1/2 flex items-center justify-center bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition shadow-md">
+                        <i class="fa-brands fa-whatsapp mr-2 text-xl"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+            `;
+        });
+    }
+
+    function getIcono(titulo) {
+        titulo = titulo.toLowerCase();
+        if(titulo.includes('suelo') || titulo.includes('compactación')) return 'fa-layer-group';
+        if(titulo.includes('topográfico') || titulo.includes('nivelación')) return 'fa-map-location-dot';
+        if(titulo.includes('densidad') || titulo.includes('permeabilidad')) return 'fa-vial-circle-check';
+        if(titulo.includes('geotécnico') || titulo.includes('calicata')) return 'fa-helmet-safety';
+        return 'fa-briefcase';
+    }
+</script>
+{% endblock %}

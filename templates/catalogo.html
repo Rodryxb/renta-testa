@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-10">
+    <h2 class="text-4xl font-extrabold text-brandBlack mb-2">{{ titulo }}</h2>
+    <p class="text-gray-500 mb-10 text-lg">{{ subtitulo }}</p>
+
+    <!-- Grid de Productos -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8" id="catalog-grid">
+        <!-- JS inyecta las cards aquí -->
+    </div>
+</div>
+
+<!-- Modal Cotizador (Maquinaria) -->
+<div id="modal-maquina" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col md:flex-row">
+        <div class="w-full md:w-1/2 bg-gray-50 p-6 border-r border-gray-200 flex flex-col justify-center">
+            <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 w-max uppercase rounded-sm mb-3">Arriendo</span>
+            <h3 class="text-2xl font-bold text-brandBlack mb-4" id="maq-title">Máquina</h3>
+            <img id="maq-img" src="" alt="Maquinaria" class="w-full h-auto object-contain drop-shadow-xl mb-4 max-h-48">
+            <p class="text-sm font-bold text-green-600 mb-2">Tarifa Diaria Base: <span id="maq-tarifa-txt">$0</span></p>
+        </div>
+        <div class="w-full md:w-1/2 p-6 bg-white relative">
+            <button onclick="closeModal('modal-maquina')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h4 class="text-lg font-bold text-brandBlack mb-4 border-b pb-2">Modelo de Cotización</h4>
+            
+            <form id="form-cotizar" onsubmit="agregarCarroMaquina(event)">
+                <input type="hidden" id="maq-id-val">
+                <input type="hidden" id="maq-tarifa-base">
+                <input type="hidden" id="maq-garantia-base">
+
+                <div class="mb-3 flex gap-2">
+                    <div class="w-1/2">
+                        <label class="block text-xs font-bold text-gray-700">Inicio</label>
+                        <input type="date" id="maq-inicio" required class="w-full px-2 py-1 text-sm border rounded" onchange="actualizarLimitesFin()">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-xs font-bold text-gray-700">Fin</label>
+                        <input type="date" id="maq-fin" required class="w-full px-2 py-1 text-sm border rounded" onchange="calcularCotizacion()">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-gray-700">Uso (Factor)</label>
+                    <select id="maq-factor" class="w-full px-2 py-1 text-sm border rounded" onchange="calcularCotizacion()">
+                        <option value="1.0">Turno Simple (1.0)</option>
+                        <option value="1.5">Doble Turno (1.5)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-700">Flete / Delivery a Obra (Zonas)</label>
+                    <select id="maq-delivery" class="w-full px-2 py-1 text-sm border rounded focus:ring-brandYellow" onchange="calcularCotizacion()">
+                        <option value="0">Retiro en Sucursal ($0)</option>
+                        <option value="550000">Zona Norte (Arica a Coquimbo) - $550.000</option>
+                        <option value="150000">Zona Central (RM, Valparaíso, O'Higgins) - $150.000</option>
+                        <option value="450000">Zona Sur (Maule a Magallanes) - $450.000</option>
+                    </select>
+                </div>
+
+                <div class="bg-gray-900 text-gray-300 p-4 rounded-lg text-xs font-mono mb-4">
+                    <p>Fórmula: (Tarifa × Factor × Días) + Flete + Garantía</p>
+                    <div class="mt-2 text-white font-bold text-lg" id="maq-total-display">Total: $0</div>
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-full hover:bg-red-700 transition shadow-lg text-sm">
+                    <i class="fa-solid fa-cart-shopping mr-2"></i> AGREGAR AL CARRO
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Comprar (Materiales) -->
+<div id="modal-material" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative">
+        <button onclick="closeModal('modal-material')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <span class="bg-brandYellow text-brandBlack text-xs font-bold px-2 py-1 w-max uppercase rounded-sm mb-2 inline-block">Venta Directa</span>
+        <h3 class="text-2xl font-bold text-brandBlack mb-4" id="mat-title">Material</h3>
+        
+        <img id="mat-img" src="" class="w-full h-40 object-contain mb-4">
+
+        <form onsubmit="agregarCarroMaterial(event)">
+            <input type="hidden" id="mat-id-val">
+            <input type="hidden" id="mat-tarifa-base">
+            
+            <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                <div class="flex justify-between items-center mb-4 border-b border-gray-300 pb-2">
+                    <span class="font-bold text-gray-700">Precio Unitario:</span>
+                    <span class="text-lg font-bold text-brandBlack" id="mat-precio-txt">$0</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="font-bold text-sm">Cantidad:</label>
+                    <input type="number" id="mat-qty" min="1" max="1000" value="1" required class="w-24 px-3 py-1 border rounded font-bold text-lg text-center" onchange="calcularMaterial()">
+                </div>
+            </div>
+
+            <div id="mat-descuento-box" class="hidden bg-green-100 text-green-800 p-3 rounded-lg border border-green-300 mb-4 text-sm text-center">
+                <i class="fa-solid fa-tags text-xl mb-1 block"></i>
+                ¡Descuento por Volumen Activado (10%)!<br>
+                <span class="font-bold">Ahorro total: <span id="mat-ahorro-txt">$0</span></span>
+            </div>
+
+            <div class="text-center mb-4">
+                <p class="text-sm text-gray-500">Total a pagar:</p>
+                <p class="text-3xl font-extrabold text-brandBlack" id="mat-total-display">$0</p>
+            </div>
+
+            <button type="submit" class="w-full bg-brandYellow text-brandBlack font-bold py-3 rounded-full hover:bg-yellow-400 transition shadow-lg">
+                <i class="fa-solid fa-cart-plus mr-2"></i> COMPRAR
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Se inyecta la variable {{ tipo }} desde Django ('MAQUINARIA' o 'MATERIAL')
+    const apiTipo = "{{ tipo }}"; 
+
+    document.addEventListener('DOMContentLoaded', loadCatalog);
+
+    async function loadCatalog() {
+        const res = await fetch(`/api/maquinarias/?tipo=${apiTipo}`);
+        const data = await res.json();
+        const grid = document.getElementById('catalog-grid');
+        grid.innerHTML = '';
+        
+        if(data.length === 0) {
+            grid.innerHTML = '<p class="text-gray-500 col-span-3 text-center py-10">No hay productos disponibles en esta categoría actualmente.</p>';
+            return;
+        }
+
+        data.forEach(item => {
+            const isMat = item.tipo === 'MATERIAL';
+            const imgUrl = (item.imagen_final || item.imagen_url) || 'https://via.placeholder.com/400x300?text=Sin+Imagen';
+            const btnText = isMat ? 'Comprar / Añadir' : 'Cotizar Arriendo';
+            const clickFn = `window.location.href='/producto/${item.id}/'`;
+
+            grid.innerHTML += `
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1 flex flex-col">
+                    <div class="h-48 bg-white flex items-center justify-center overflow-hidden border-b p-4">
+                        <img src="${imgUrl}" alt="${item.nombre}" class="max-h-full object-contain cursor-pointer" onclick="${clickFn}">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <h3 class="text-lg font-bold text-brandBlack mb-1 cursor-pointer hover:text-brandYellow" onclick="${clickFn}">${item.nombre}</h3>
+                        <p class="text-gray-500 text-xs mb-3 uppercase tracking-wider">${item.categoria}</p>
+                        
+                        <div class="mt-auto">
+                            <p class="text-sm text-gray-500 mb-1">Stock Disponible: <span class="font-bold ${item.stock_disponible > 0 ? 'text-green-600' : 'text-red-500'}">${item.stock_disponible} unid.</span></p>
+                            <p class="text-lg font-extrabold text-brandBlack mb-4">$${item.tarifa_diaria.toLocaleString('es-CL')} ${isMat ? '/ unid.' : '/ día'}</p>
+                            <button onclick="${clickFn}" class="w-full bg-brandBlack text-brandYellow font-bold py-2 rounded-lg hover:bg-gray-900 transition shadow">
+                                ${btnText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    
+    // Nueva funcion para limitar las fechas de arriendo (Mínimo Hoy, Máximo 3 Semanas)
+    function actualizarLimitesFin() {
+        const inicioInput = document.getElementById('maq-inicio');
+        const finInput = document.getElementById('maq-fin');
+        if(!inicioInput.value) return;
+        
+        const startDate = new Date(inicioInput.value);
+        // La fecha de fin no puede ser anterior a la de inicio
+        finInput.min = inicioInput.value;
+        
+        // Sumar 21 días (3 semanas)
+        const maxDate = new Date(startDate);
+        maxDate.setDate(maxDate.getDate() + 21);
+        finInput.max = maxDate.toISOString().split('T')[0];
+        
+        // Corregir si el usuario ya tenía una fecha fuera del rango
+        if(finInput.value) {
+            const currentFin = new Date(finInput.value);
+            if(currentFin > maxDate) {
+                finInput.value = finInput.max;
+                alert("El plazo máximo de arriendo es de 3 semanas (21 días). Se ha ajustado la fecha.");
+            }
+            if(currentFin < startDate) {
+                finInput.value = finInput.min;
+            }
+        }
+        calcularCotizacion();
+    }
+
+    // Modal Cotizador
+    function openMaquina(id, nombre, tarifa, garantia, img) {
+        const today = new Date().toISOString().split('T')[0];
+        const inicioInput = document.getElementById('maq-inicio');
+        inicioInput.min = today; // No puede ser en tiempo pasado
+        
+        document.getElementById('maq-id-val').value = id;
+        document.getElementById('maq-title').innerText = nombre;
+        document.getElementById('maq-tarifa-base').value = tarifa;
+        document.getElementById('maq-garantia-base').value = garantia;
+        document.getElementById('maq-img').src = img;
+        document.getElementById('maq-tarifa-txt').innerText = `$${tarifa.toLocaleString('es-CL')}`;
+        document.getElementById('form-cotizar').reset();
+        document.getElementById('maq-total-display').innerText = `Total: $0`;
+        document.getElementById('modal-maquina').classList.remove('hidden');
+    }
+
+    function calcularCotizacion() {
+        const start = document.getElementById('maq-inicio').value;
+        const end = document.getElementById('maq-fin').value;
+        const factor = parseFloat(document.getElementById('maq-factor').value);
+        const flete = parseFloat(document.getElementById('maq-delivery').value);
+        const tarifa = parseFloat(document.getElementById('maq-tarifa-base').value);
+        const garantia = parseFloat(document.getElementById('maq-garantia-base').value);
+
+        let dias = 1;
+        if(start && end) {
+            const d1 = new Date(start); const d2 = new Date(end);
+            const diffTime = Math.abs(d2 - d1);
+            dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if(dias === 0) dias = 1;
+        }
+
+        const total = (tarifa * factor * dias) + flete + garantia;
+        document.getElementById('maq-total-display').innerText = `Total: $${total.toLocaleString('es-CL')}`;
+    }
+
+    async function agregarCarroMaquina(e) {
+        e.preventDefault();
+        if(!requireLogin()) return;
+
+        const payload = {
+            maquinaria: document.getElementById('maq-id-val').value,
+            fecha_inicio: document.getElementById('maq-inicio').value,
+            fecha_fin: document.getElementById('maq-fin').value,
+            factor_uso: document.getElementById('maq-factor').value,
+            costo_delivery: document.getElementById('maq-delivery').value,
+            cantidad: 1
+        };
+
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/carro-arriendo/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            closeModal('modal-maquina');
+            showToast('Cotización agregada al carro exitosamente.');
+        } else {
+            alert('Error al agregar al carro.');
+        }
+    }
+
+    // Modal Venta Materiales
+    function openMaterial(id, nombre, tarifa, img) {
+        document.getElementById('mat-id-val').value = id;
+        document.getElementById('mat-title').innerText = nombre;
+        document.getElementById('mat-tarifa-base').value = tarifa;
+        document.getElementById('mat-img').src = img;
+        document.getElementById('mat-precio-txt').innerText = `$${tarifa.toLocaleString('es-CL')}`;
+        document.getElementById('mat-qty').value = 1;
+        calcularMaterial();
+        document.getElementById('modal-material').classList.remove('hidden');
+    }
+
+    function calcularMaterial() {
+        const qty = parseInt(document.getElementById('mat-qty').value) || 1;
+        const tarifa = parseFloat(document.getElementById('mat-tarifa-base').value);
+        let base = qty * tarifa;
+        
+        const descBox = document.getElementById('mat-descuento-box');
+        if(qty >= 30) {
+            const descuento = base * 0.10;
+            const final = base - descuento;
+            descBox.classList.remove('hidden');
+            document.getElementById('mat-ahorro-txt').innerText = `$${descuento.toLocaleString('es-CL')}`;
+            document.getElementById('mat-total-display').innerText = `$${final.toLocaleString('es-CL')}`;
+        } else {
+            descBox.classList.add('hidden');
+            document.getElementById('mat-total-display').innerText = `$${base.toLocaleString('es-CL')}`;
+        }
+    }
+
+    async function agregarCarroMaterial(e) {
+        e.preventDefault();
+        if(!requireLogin()) return;
+
+        const payload = {
+            maquinaria: document.getElementById('mat-id-val').value,
+            cantidad: document.getElementById('mat-qty').value
+        };
+
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/carro-arriendo/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            closeModal('modal-material');
+            showToast('Material agregado a tu compra exitosamente.');
+        } else {
+            alert('Error al agregar material al carro.');
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+</script>
+{% endblock %}

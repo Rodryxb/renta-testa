@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gray-50 py-8 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+        <h1 class="text-3xl font-extrabold text-brandBlack"><i class="fa-solid fa-cart-flatbed text-brandYellow mr-3"></i> Mi Carro de Compras y Arriendos</h1>
+        <a href="/maquinas/" class="text-gray-500 hover:text-brandYellow font-bold transition"><i class="fa-solid fa-arrow-left"></i> Seguir cotizando</a>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex flex-col lg:flex-row gap-8">
+        
+        <!-- Lista de Items -->
+        <div class="lg:w-2/3">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h2 class="text-xl font-bold text-gray-700">Artículos en tu carro</h2>
+                    <span id="cart-count" class="bg-brandBlack text-brandYellow px-3 py-1 rounded-full text-sm font-bold shadow-inner">0 items</span>
+                </div>
+                
+                <div id="cart-items" class="divide-y divide-gray-100 p-6">
+                    <div class="text-center py-10 text-gray-400">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                        <p>Cargando tu carro...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen de Checkout -->
+        <div class="lg:w-1/3">
+            <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 sticky top-10">
+                <h3 class="text-2xl font-black text-brandBlack mb-6 border-b pb-4">Resumen de Orden</h3>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal Arriendos:</span>
+                        <span id="resumen-arriendos" class="font-bold">$0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal Materiales:</span>
+                        <span id="resumen-materiales" class="font-bold">$0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Fletes y Despachos:</span>
+                        <span id="resumen-fletes" class="font-bold">$0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600 pb-4 border-b border-gray-200">
+                        <span>Garantías Reembolsables:</span>
+                        <span id="resumen-garantias" class="font-bold">$0</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-end mb-8">
+                    <span class="text-lg font-bold text-brandBlack">Total a Pagar:</span>
+                    <span class="text-4xl font-extrabold text-green-600" id="resumen-total">$0</span>
+                </div>
+
+                <button onclick="procesarPago()" class="w-full bg-brandYellow text-brandBlack font-extrabold py-4 rounded-xl hover:bg-yellow-400 transition shadow-xl text-lg transform hover:-translate-y-1 mb-3">
+                    <i class="fa-solid fa-credit-card mr-2"></i> IR A PAGAR
+                </button>
+                <p class="text-xs text-center text-gray-400"><i class="fa-solid fa-lock text-brandYellow"></i> Transacción 100% segura y encriptada.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if(!requireLogin()) return;
+        loadCart();
+    });
+
+    async function loadCart() {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/carro-arriendo/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const cartContainer = document.getElementById('cart-items');
+        
+        if(!res.ok) {
+            cartContainer.innerHTML = '<p class="text-red-500 text-center py-10">Error al cargar el carrito.</p>';
+            return;
+        }
+
+        const data = await res.json();
+        const items = data.items || [];
+        
+        if(items.length === 0) {
+            cartContainer.innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fa-solid fa-box-open text-6xl text-gray-200 mb-4"></i>
+                    <p class="text-gray-500 text-lg">Tu carro está vacío.</p>
+                    <a href="/maquinas/" class="inline-block mt-4 bg-brandBlack text-brandYellow px-6 py-2 rounded-lg font-bold hover:bg-gray-800">Ir al catálogo</a>
+                </div>
+            `;
+            updateResumen(0, 0, 0, 0);
+            document.getElementById('cart-count').innerText = '0 items';
+            return;
+        }
+
+        document.getElementById('cart-count').innerText = `${items.length} item(s)`;
+        cartContainer.innerHTML = '';
+        
+        let subArriendos = 0;
+        let subMateriales = 0;
+        let fletes = 0;
+        let garantias = 0;
+
+        items.forEach(item => {
+            const maq = item.maquinaria_detalle; // CORRECCIÓN CLAVE
+            if(!maq) return;
+
+            const isMaq = maq.tipo === 'MAQUINARIA';
+            
+            // Calculos internos para el resumen visual
+            let totalItem = 0;
+            if(isMaq) {
+                let dias = 1;
+                if(item.fecha_inicio && item.fecha_fin) {
+                    const d1 = new Date(item.fecha_inicio);
+                    const d2 = new Date(item.fecha_fin);
+                    const diff = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24));
+                    if(diff > 0) dias = diff;
+                }
+                
+                const tarifa = parseFloat(maq.tarifa_diaria) || 0;
+                const factor = parseFloat(item.factor_uso) || 1;
+                const delivery = parseFloat(item.costo_delivery) || 0;
+                const garantiaVal = parseFloat(maq.garantia) || 0;
+                
+                const sub = tarifa * factor * dias;
+                subArriendos += sub;
+                fletes += delivery;
+                garantias += garantiaVal;
+                totalItem = sub + delivery + garantiaVal;
+            } else {
+                const tarifa = parseFloat(maq.tarifa_diaria) || 0;
+                const qty = parseInt(item.cantidad) || 1;
+                const sub = tarifa * qty;
+                let finalMat = sub;
+                if(item.cantidad >= 30) finalMat = sub * 0.90; // Descuento visual 10%
+                subMateriales += finalMat;
+                totalItem = finalMat;
+            }
+
+            const img = (maq.imagen_final || maq.imagen_url) || 'https://via.placeholder.com/150';
+            
+            cartContainer.innerHTML += `
+                <div class="flex flex-col md:flex-row gap-6 py-6 group relative">
+                    <button onclick="eliminarItem(${item.id})" class="absolute top-6 right-0 text-gray-300 hover:text-red-500 transition" title="Eliminar del carro">
+                        <i class="fa-solid fa-trash-can text-xl"></i>
+                    </button>
+                    <div class="w-full md:w-32 h-32 bg-white rounded-lg border border-gray-200 flex items-center justify-center p-2 flex-shrink-0">
+                        <img src="${img}" class="max-h-full object-contain">
+                    </div>
+                    <div class="flex-grow pr-8">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="${isMaq ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'} text-[10px] font-black px-2 py-0.5 rounded uppercase">${maq.tipo}</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-brandBlack mb-2">${maq.nombre}</h4>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-2 items-center">
+                            ${isMaq ? `
+                                <div><i class="fa-regular fa-calendar text-brandYellow w-5"></i> <b>Fechas:</b> <br> ${item.fecha_inicio} al ${item.fecha_fin}</div>
+                                <div><i class="fa-solid fa-truck text-brandYellow w-5"></i> <b>Flete:</b> <br> $${parseFloat(item.costo_delivery || 0).toLocaleString('es-CL')}</div>
+                            ` : `
+                                <div class="col-span-2 flex items-center gap-3">
+                                    <i class="fa-solid fa-cubes text-brandYellow"></i> <b>Cantidad / Stock:</b>
+                                    <input type="number" min="1" max="${maq.stock_disponible}" value="${item.cantidad}" 
+                                        onchange="actualizarCantidad(${item.id}, this.value, ${maq.stock_disponible})"
+                                        class="w-20 px-2 py-1 border border-gray-300 rounded font-bold text-center focus:ring-2 focus:ring-brandYellow">
+                                    <span class="text-xs text-gray-400">(Max: ${maq.stock_disponible})</span>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 text-right flex flex-col justify-end pt-4 md:pt-0">
+                        <p class="text-xs text-gray-500 mb-1">Subtotal Item:</p>
+                        <p class="text-2xl font-black text-brandBlack">$${totalItem.toLocaleString('es-CL')}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        updateResumen(subArriendos, subMateriales, fletes, garantias);
+    }
+
+    function updateResumen(arr, mat, flete, gar) {
+        document.getElementById('resumen-arriendos').innerText = `$${arr.toLocaleString('es-CL')}`;
+        document.getElementById('resumen-materiales').innerText = `$${mat.toLocaleString('es-CL')}`;
+        document.getElementById('resumen-fletes').innerText = `$${flete.toLocaleString('es-CL')}`;
+        document.getElementById('resumen-garantias').innerText = `$${gar.toLocaleString('es-CL')}`;
+        
+        const total = arr + mat + flete + gar;
+        document.getElementById('resumen-total').innerText = `$${total.toLocaleString('es-CL')}`;
+    }
+
+    async function actualizarCantidad(itemId, nuevaCantidad, stockMaximo) {
+        if(nuevaCantidad < 1) nuevaCantidad = 1;
+        if(nuevaCantidad > stockMaximo) {
+            alert('Has excedido el stock máximo disponible.');
+            nuevaCantidad = stockMaximo;
+        }
+
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/carro-arriendo/', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ item_id: itemId, cantidad: nuevaCantidad })
+        });
+
+        if(res.ok) {
+            loadCart(); // Recargar para mostrar los nuevos precios y descuentos
+        } else {
+            alert('No se pudo actualizar la cantidad.');
+        }
+    }
+
+    async function eliminarItem(id) {
+        if(!confirm('¿Quitar este ítem de tu compra?')) return;
+        
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/carro-arriendo/`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ item_id: id })
+        });
+        
+        if(res.ok) {
+            showToast('Ítem eliminado del carro.');
+            loadCart();
+        }
+    }
+
+    function procesarPago() {
+        const total = document.getElementById('resumen-total').innerText;
+        if(total === '$0') {
+            alert('Tu carro está vacío.');
+            return;
+        }
+        alert('Simulación de Checkout Exitoso. \nRedirigiendo a Webpay Plus...');
+    }
+</script>
+{% endblock %}

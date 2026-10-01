@@ -1,0 +1,27 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos de la Base de Datos SQLite (AQUÍ ESTÁN TUS DATOS, NUNCA SUBIR A GITHUB)
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos subidos por los usuarios (Imágenes, documentos)
+media/
+# (Opcional: puedes dejar la carpeta vacía pero ignorar el contenido)
+# media/*
+# !media/.keep
+
+# Archivos de Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Configuración del editor de código
+.vscode/
+.idea/
