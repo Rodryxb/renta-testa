@@ -42,7 +42,7 @@ class RegistroClienteView(APIView):
 # Un ModelViewSet incluye automáticamente las rutas para Listar(GET), Crear(POST),
 # Editar(PUT) y Eliminar(DELETE).
 class MaquinariaViewSet(viewsets.ModelViewSet):
-    queryset = Maquinaria.objects.all().order_by('id')
+    queryset = Maquinaria.objects.all().order_by('-id')
     # Permite leer datos en formato Multipart (imágenes de la PC) o formato JSON
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     serializer_class = MaquinariaSerializer
@@ -205,7 +205,7 @@ from .models import ServicioExterno
 from .serializers import ServicioExternoSerializer
 
 class ServicioExternoViewSet(viewsets.ModelViewSet):
-    queryset = ServicioExterno.objects.all().order_by('id')
+    queryset = ServicioExterno.objects.all().order_by('-id')
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     serializer_class = ServicioExternoSerializer
     
