@@ -39,8 +39,8 @@ Renta Testa es una plataforma integral de comercio electrónico diseñada para l
    ```bash
    python -m venv venv
    # En Windows:
-   .env\Scriptsctivate
-   # En Linux/Mac:
+.\venv\Scripts\activate
+# En Linux/Mac:
    source venv/bin/activate
    ```
 
