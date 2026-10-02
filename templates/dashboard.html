@@ -225,8 +225,8 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm font-bold">${m.nombre}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">${m.categoria}</td>
-                        <td class="px-6 py-4 text-sm text-green-600 font-bold">$${m.tarifa_diaria}/día</td>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-600">$${m.garantia}</td>
+                        <td class="px-6 py-4 text-sm text-green-600 font-bold">$${parseInt(m.tarifa_diaria).toLocaleString('en-US')} CLP/día</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-600">$${parseInt(m.garantia).toLocaleString('en-US')} CLP</td>
                         <td class="px-6 py-4 text-sm font-bold text-blue-600">${m.stock_disponible}</td>
                         <td class="px-6 py-4 text-right text-sm">
                             <button onclick="editMaquinaria(${m.id}, 'MAQUINARIA')" class="text-blue-600 mr-3"><i class="fa-solid fa-pen"></i></button>
@@ -238,7 +238,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm font-bold">${m.nombre}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">${m.categoria}</td>
-                        <td class="px-6 py-4 text-sm text-green-600 font-bold">$${m.tarifa_diaria} c/u</td>
+                        <td class="px-6 py-4 text-sm text-green-600 font-bold">$${parseInt(m.tarifa_diaria).toLocaleString('en-US')} CLP c/u</td>
                         <td class="px-6 py-4 text-sm font-bold text-blue-600">${m.stock_disponible}</td>
                         <td class="px-6 py-4 text-right text-sm">
                             <button onclick="editMaquinaria(${m.id}, 'MATERIAL')" class="text-blue-600 mr-3"><i class="fa-solid fa-pen"></i></button>

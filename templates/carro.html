@@ -271,7 +271,7 @@
                         <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-2 items-center">
                             ${isMaq ? `
                                 <div><i class="fa-regular fa-calendar text-brandYellow w-5"></i> <b>Fechas:</b> <br> ${item.fecha_inicio} al ${item.fecha_fin}</div>
-                                <div><i class="fa-solid fa-truck text-brandYellow w-5"></i> <b>Flete:</b> <br> $${parseFloat(item.costo_delivery || 0).toLocaleString('es-CL')}</div>
+                                <div><i class="fa-solid fa-truck text-brandYellow w-5"></i> <b>Flete:</b> <br> $${parseFloat(item.costo_delivery || 0).toLocaleString('en-US')}</div>
                             ` : `
                                 <div class="col-span-2 flex items-center gap-3">
                                     <i class="fa-solid fa-cubes text-brandYellow"></i> <b>Cantidad / Stock:</b>
@@ -285,7 +285,7 @@
                     </div>
                     <div class="flex-shrink-0 text-right flex flex-col justify-end pt-4 md:pt-0">
                         <p class="text-xs text-gray-500 mb-1">Subtotal Item:</p>
-                        <p class="text-2xl font-black text-brandBlack">$${totalItem.toLocaleString('es-CL')}</p>
+                        <p class="text-2xl font-black text-brandBlack">$${totalItem.toLocaleString('en-US')} CLP</p>
                     </div>
                 </div>
             `;
@@ -295,13 +295,13 @@
     }
 
     function updateResumen(arr, mat, flete, gar) {
-        document.getElementById('resumen-arriendos').innerText = `$${arr.toLocaleString('es-CL')}`;
-        document.getElementById('resumen-materiales').innerText = `$${mat.toLocaleString('es-CL')}`;
-        document.getElementById('resumen-fletes').innerText = `$${flete.toLocaleString('es-CL')}`;
-        document.getElementById('resumen-garantias').innerText = `$${gar.toLocaleString('es-CL')}`;
+        document.getElementById('resumen-arriendos').innerText = `$${arr.toLocaleString('en-US')} CLP`;
+        document.getElementById('resumen-materiales').innerText = `$${mat.toLocaleString('en-US')} CLP`;
+        document.getElementById('resumen-fletes').innerText = `$${flete.toLocaleString('en-US')} CLP`;
+        document.getElementById('resumen-garantias').innerText = `$${gar.toLocaleString('en-US')} CLP`;
         
         const total = arr + mat + flete + gar;
-        document.getElementById('resumen-total').innerText = `$${total.toLocaleString('es-CL')}`;
+        document.getElementById('resumen-total').innerText = `$${total.toLocaleString('en-US')} CLP`;
     }
 
     async function actualizarCantidad(itemId, nuevaCantidad, stockMaximo) {

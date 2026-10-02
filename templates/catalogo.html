@@ -146,7 +146,7 @@
                         
                         <div class="mt-auto">
                             <p class="text-sm text-gray-500 mb-1">Stock Disponible: <span class="font-bold ${item.stock_disponible > 0 ? 'text-green-600' : 'text-red-500'}">${item.stock_disponible} unid.</span></p>
-                            <p class="text-lg font-extrabold text-brandBlack mb-4">$${item.tarifa_diaria.toLocaleString('es-CL')} ${isMat ? '/ unid.' : '/ día'}</p>
+                            <p class="text-lg font-extrabold text-brandBlack mb-4">$${parseInt(item.tarifa_diaria).toLocaleString('en-US')} CLP ${isMat ? '/ unid.' : '/ día'}</p>
                             <button onclick="${clickFn}" class="w-full bg-brandBlack text-brandYellow font-bold py-2 rounded-lg hover:bg-gray-900 transition shadow">
                                 ${btnText}
                             </button>
@@ -198,7 +198,7 @@
         document.getElementById('maq-tarifa-base').value = tarifa;
         document.getElementById('maq-garantia-base').value = garantia;
         document.getElementById('maq-img').src = img;
-        document.getElementById('maq-tarifa-txt').innerText = `$${tarifa.toLocaleString('es-CL')}`;
+        document.getElementById('maq-tarifa-txt').innerText = `$${tarifa.toLocaleString('en-US')} CLP`;
         document.getElementById('form-cotizar').reset();
         document.getElementById('maq-total-display').innerText = `Total: $0`;
         document.getElementById('modal-maquina').classList.remove('hidden');
@@ -221,7 +221,7 @@
         }
 
         const total = (tarifa * factor * dias) + flete + garantia;
-        document.getElementById('maq-total-display').innerText = `Total: $${total.toLocaleString('es-CL')}`;
+        document.getElementById('maq-total-display').innerText = `Total: $${total.toLocaleString('en-US')} CLP`;
     }
 
     async function agregarCarroMaquina(e) {
@@ -258,7 +258,7 @@
         document.getElementById('mat-title').innerText = nombre;
         document.getElementById('mat-tarifa-base').value = tarifa;
         document.getElementById('mat-img').src = img;
-        document.getElementById('mat-precio-txt').innerText = `$${tarifa.toLocaleString('es-CL')}`;
+        document.getElementById('mat-precio-txt').innerText = `$${tarifa.toLocaleString('en-US')} CLP`;
         document.getElementById('mat-qty').value = 1;
         calcularMaterial();
         document.getElementById('modal-material').classList.remove('hidden');
@@ -274,11 +274,11 @@
             const descuento = base * 0.10;
             const final = base - descuento;
             descBox.classList.remove('hidden');
-            document.getElementById('mat-ahorro-txt').innerText = `$${descuento.toLocaleString('es-CL')}`;
-            document.getElementById('mat-total-display').innerText = `$${final.toLocaleString('es-CL')}`;
+            document.getElementById('mat-ahorro-txt').innerText = `$${descuento.toLocaleString('en-US')} CLP`;
+            document.getElementById('mat-total-display').innerText = `$${final.toLocaleString('en-US')} CLP`;
         } else {
             descBox.classList.add('hidden');
-            document.getElementById('mat-total-display').innerText = `$${base.toLocaleString('es-CL')}`;
+            document.getElementById('mat-total-display').innerText = `$${base.toLocaleString('en-US')} CLP`;
         }
     }
 

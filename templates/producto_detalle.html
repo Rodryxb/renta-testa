@@ -207,9 +207,9 @@
         const subtotalDias = tarifa * factor * dias;
         const total = subtotalDias + flete + garantia;
         
-        document.getElementById('res-dias').innerText = `$${subtotalDias.toLocaleString('es-CL')} (${dias} días)`;
-        document.getElementById('res-flete').innerText = `$${flete.toLocaleString('es-CL')}`;
-        document.getElementById('maq-total-display').innerText = `$${total.toLocaleString('es-CL')}`;
+        document.getElementById('res-dias').innerText = `$${subtotalDias.toLocaleString('en-US')} (${dias} días)`;
+        document.getElementById('res-flete').innerText = `$${flete.toLocaleString('en-US')} CLP`;
+        document.getElementById('maq-total-display').innerText = `$${total.toLocaleString('en-US')} CLP`;
     }
 
     async function agregarCarroMaquina(e) {
@@ -265,11 +265,11 @@
             const descuento = base * 0.10;
             const final = base - descuento;
             descBox.classList.remove('hidden');
-            document.getElementById('mat-ahorro-txt').innerText = `$${descuento.toLocaleString('es-CL')}`;
-            document.getElementById('mat-total-display').innerText = `$${final.toLocaleString('es-CL')}`;
+            document.getElementById('mat-ahorro-txt').innerText = `$${descuento.toLocaleString('en-US')} CLP`;
+            document.getElementById('mat-total-display').innerText = `$${final.toLocaleString('en-US')} CLP`;
         } else {
             descBox.classList.add('hidden');
-            document.getElementById('mat-total-display').innerText = `$${base.toLocaleString('es-CL')}`;
+            document.getElementById('mat-total-display').innerText = `$${base.toLocaleString('en-US')} CLP`;
         }
     }
 
