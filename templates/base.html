@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -53,10 +53,10 @@
                     
                     <div class="hidden md:flex space-x-6 items-center pt-1">
                         <a href="/" class="nav-link text-gray-300 hover:text-white transition font-medium">Inicio</a>
-                        <a href="/maquinas/" class="nav-link text-gray-300 hover:text-white transition font-medium">MÃ¡quinas</a>
+                        <a href="/maquinas/" class="nav-link text-gray-300 hover:text-white transition font-medium">Máquinas</a>
                         <a href="/materiales/" class="nav-link text-gray-300 hover:text-white transition font-medium">Materiales</a>
                         <a href="/servicios/" class="nav-link text-gray-300 hover:text-white transition font-medium">Servicios Técnicos</a>
-                        <a href="/devoluciones/" class="nav-link text-gray-300 hover:text-brandYellow transition font-medium bg-gray-800 px-3 py-1 rounded-md border border-gray-600 shadow-sm"><i class="fa-solid fa-clock-rotate-left mr-1"></i> DevoluciÃ³n</a>
+                        <a href="/devoluciones/" class="nav-link text-gray-300 hover:text-brandYellow transition font-medium bg-gray-800 px-3 py-1 rounded-md border border-gray-600 shadow-sm"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Devolución</a>
                     </div>
                 </div>
                 
@@ -78,7 +78,7 @@
     <footer class="bg-brandBlack text-gray-400 py-6 text-center border-t border-brandMetallic mt-12">
         <div class="max-w-7xl mx-auto px-4">
             <p class="mb-2"><span class="text-brandYellow font-bold">Renta Testa</span> &copy; 2026. Todos los derechos reservados.</p>
-            <p class="text-sm">EvaluaciÃ³n Backend/Frontend | Alumno: <span class="text-white">Rodrigo Bastian Castro Sandoval</span> | SecciÃ³n: <span class="text-white">AP-N4-C1</span> | AÃ±o: <span class="text-white">2026</span></p>
+            <p class="text-sm">Evaluación Backend/Frontend | Alumno: <span class="text-white">Rodrigo Bastian Castro Sandoval</span> | Sección: <span class="text-white">AP-N4-C1</span> | Año: <span class="text-white">2026</span></p>
         </div>
     </footer>
 
@@ -115,7 +115,7 @@
                         <div id="dropdown-user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl border border-gray-200 hidden z-50">
                             <div class="py-1">
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-bold border-b"><i class="fa-solid fa-user-circle mr-2"></i> Mi Perfil</a>
-                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"><i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Cerrar SesiÃ³n</button>
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"><i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Cerrar Sesión</button>
                             </div>
                         </div>
                     </div>
@@ -163,7 +163,7 @@
 
         function requireLogin() {
             if(!localStorage.getItem('access_token')) {
-                alert('Debes iniciar sesiÃ³n en tu cuenta para cotizar y comprar.');
+                alert('Debes iniciar sesión en tu cuenta para cotizar y comprar.');
                 window.location.href = '/auth/';
                 return false;
             }
