@@ -10,17 +10,30 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['rol'] = user.rol
-        
-        # Lógica de seguridad: Diferenciar tiempo de expiración según el rol
-        if user.rol == 'EJECUTIVO':
-            token.set_exp(lifetime=timedelta(minutes=2)) # Superusuarios: 2 min
-        else:
-            token.set_exp(lifetime=timedelta(hours=24)) # Clientes: 24 hrs
-            
         return token
 
     def validate(self, attrs):
-        data = super().validate(attrs)
+        # Llama a la validación original de SimpleJWT (valida usuario/password)
+        # Esto nos da el diccionario inicial (pero vacío de tokens aún en versiones antiguas, o con tokens por defecto)
+        data = super(TokenObtainPairSerializer, self).validate(attrs)
+
+        # Generar el Refresh Token con nuestros claims personalizados (rol)
+        refresh = self.get_token(self.user)
+
+        # Generar el Access Token a partir del Refresh
+        access_token = refresh.access_token
+
+        # AQUI ES DONDE MODIFICAMOS LA EXPIRACIÓN DEL ACCESS TOKEN
+        if self.user.rol == 'EJECUTIVO':
+            access_token.set_exp(lifetime=timedelta(minutes=2)) # Superusuarios: 2 min
+        else:
+            access_token.set_exp(lifetime=timedelta(hours=24)) # Clientes: 24 horas
+
+        # Reemplazar los tokens en la respuesta final
+        data["refresh"] = str(refresh)
+        data["access"] = str(access_token)
+
+        # Datos adicionales para el frontend (localStorage)
         data['rol'] = self.user.rol
         data['first_name'] = self.user.first_name or self.user.username.split('@')[0]
         data['email'] = self.user.email
