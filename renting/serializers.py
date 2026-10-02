@@ -51,9 +51,7 @@ class MaquinariaSerializer(serializers.ModelSerializer):
 
     def get_imagen_final(self, obj):
         if obj.imagen_upload:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.imagen_upload.url)
+            # Retornar ruta relativa para que funcione detrás de Proxies (Ngrok/DevTunnels)
             return obj.imagen_upload.url
         return obj.imagen_url
 

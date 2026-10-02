@@ -24,6 +24,24 @@
     </div>
 </div>
 
+
+<!-- Modal de Autenticación Requerida -->
+<div id="modal-auth-alert" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden text-center transform transition-all">
+        <div class="bg-brandBlack p-6 border-b-4 border-brandYellow">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-800 mb-4 border-2 border-brandYellow">
+                <i class="fa-solid fa-lock text-3xl text-brandYellow"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Acceso Restringido</h3>
+            <p class="text-sm text-gray-300">Debes iniciar sesión con tu cuenta para poder reportar un siniestro o gestionar devoluciones.</p>
+        </div>
+        <div class="p-4 flex gap-3 justify-center bg-gray-50">
+            <button onclick="document.getElementById('modal-auth-alert').classList.add('hidden')" class="w-1/2 bg-white text-gray-700 font-bold py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-100 transition shadow-sm">Cancelar</button>
+            <a href="/auth/" class="w-1/2 bg-brandYellow text-brandBlack font-bold py-2 px-4 rounded-lg hover:bg-yellow-400 transition shadow-sm flex items-center justify-center">Ir al Login</a>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Daño / Soporte -->
 <div id="modal-dano" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative">
@@ -67,6 +85,11 @@
 <script>
 
     function openDanoModal() {
+        const token = localStorage.getItem('access_token');
+        if(!token) {
+            document.getElementById('modal-auth-alert').classList.remove('hidden');
+            return;
+        }
         document.getElementById('modal-dano').classList.remove('hidden');
     }
     
@@ -76,9 +99,22 @@
     
     function enviarReporte(e) {
         e.preventDefault();
-        alert('¡Tus evidencias han sido enviadas a devolucion@material.com!\nNuestro equipo de siniestros se pondrá en contacto contigo en las próximas 2 horas hábiles.');
+        // Cambiamos el alert nativo por una experiencia profesional
         closeDanoModal();
         e.target.reset();
+        
+        // Reutilizamos el sistema global de notificaciones (Toast) de base.html
+        if (typeof showToast === 'function') {
+            showToast('¡Evidencias enviadas! Te contactaremos a la brevedad.');
+        } else {
+            // Fallback en caso de que showToast falle
+            const formContainer = document.getElementById('devoluciones-container');
+            const successDiv = document.createElement('div');
+            successDiv.className = "mb-6 bg-green-100 border-l-4 border-green-600 text-green-800 p-5 rounded-r-xl shadow-md font-medium text-lg flex items-start gap-4";
+            successDiv.innerHTML = '<i class="fa-solid fa-circle-check text-2xl text-green-600 mt-1"></i><div><strong>Reporte Enviado:</strong><br>Nuestro equipo de siniestros se pondrá en contacto contigo en las próximas 2 horas hábiles.</div>';
+            formContainer.parentNode.insertBefore(successDiv, formContainer);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {

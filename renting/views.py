@@ -268,7 +268,7 @@ class DevolucionesActivasView(APIView):
                 
             imagen = ''
             if item.maquinaria.imagen_upload:
-                imagen = request.build_absolute_uri(item.maquinaria.imagen_upload.url)
+                imagen = item.maquinaria.imagen_upload.url
             elif item.maquinaria.imagen_url:
                 imagen = item.maquinaria.imagen_url
 
