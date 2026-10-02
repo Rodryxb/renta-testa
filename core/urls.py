@@ -3,7 +3,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from core.views import carro_view, index_view, auth_view, dashboard_view, maquinas_view, materiales_view, otros_servicios_view, custom_404_view, producto_detalle_view
+from core.views import carro_view, index_view, auth_view, dashboard_view, maquinas_view, materiales_view, otros_servicios_view, custom_404_view, devoluciones_view, producto_detalle_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,6 +20,7 @@ urlpatterns = [
     path('materiales/', materiales_view, name='materiales'),
     path('producto/<int:pk>/', producto_detalle_view, name='producto_detalle'),
     path('servicios/', otros_servicios_view, name='servicios'),
+    path('devoluciones/', devoluciones_view, name='devoluciones'),
 ]
 
 if settings.DEBUG:

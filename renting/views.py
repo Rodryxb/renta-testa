@@ -1,3 +1,4 @@
+from datetime import timedelta
 from rest_framework import viewsets, permissions, status
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
@@ -118,8 +119,19 @@ class CheckoutView(APIView):
         # 1. Verificar si hay stock real antes de proceder
         for item in carro.items.all():
             if item.maquinaria.stock_disponible < item.cantidad:
+                proxima_fecha = ""
+                if item.maquinaria.tipo == 'MAQUINARIA':
+                    siguiente_devolucion = ItemContrato.objects.filter(
+                        maquinaria=item.maquinaria,
+                        contrato__estado__in=['PAGADO', 'ENTREGADO']
+                    ).order_by('fecha_fin').first()
+                    
+                    if siguiente_devolucion and siguiente_devolucion.fecha_fin:
+                        fecha_disp = siguiente_devolucion.fecha_fin + timedelta(days=1)
+                        proxima_fecha = f" Próximo equipo disponible el: {fecha_disp.strftime('%d/%m/%Y')}."
+                        
                 return Response(
-                    {"error": f"Stock insuficiente para {item.maquinaria.nombre}"},
+                    {"error": f"Stock insuficiente para {item.maquinaria.nombre}.{proxima_fecha}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -227,3 +239,47 @@ class ConfiguracionView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DevolucionesActivasView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from django.utils import timezone
+        
+        items = ItemContrato.objects.filter(
+            contrato__usuario=request.user,
+            contrato__estado__in=['PAGADO', 'ENTREGADO'],
+            maquinaria__tipo='MAQUINARIA',
+            fecha_fin__isnull=False
+        ).order_by('fecha_fin')
+        
+        datos = []
+        hoy = timezone.now().date()
+        for item in items:
+            dias_restantes = (item.fecha_fin - hoy).days
+            
+            # El dia 0 no cuenta como dijo el usuario (es el día de envío)
+            if dias_restantes < 0:
+                estado_dias = f"Atrasado por {abs(dias_restantes)} días"
+            elif dias_restantes == 0:
+                estado_dias = "Día de envío (No cuenta)"
+            else:
+                estado_dias = f"Quedan {dias_restantes} días"
+                
+            imagen = ''
+            if item.maquinaria.imagen_upload:
+                imagen = request.build_absolute_uri(item.maquinaria.imagen_upload.url)
+            elif item.maquinaria.imagen_url:
+                imagen = item.maquinaria.imagen_url
+
+            datos.append({
+                'id': item.id,
+                'maquinaria': item.maquinaria.nombre,
+                'imagen': imagen,
+                'fecha_inicio': item.fecha_inicio.strftime('%d/%m/%Y'),
+                'fecha_fin': item.fecha_fin.strftime('%d/%m/%Y'),
+                'estado_dias': estado_dias,
+                'contrato_id': item.contrato.id
+            })
+            
+        return Response(datos)

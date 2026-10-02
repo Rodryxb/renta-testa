@@ -43,3 +43,7 @@ def producto_detalle_view(request, pk):
 
 def carro_view(request):
     return render(request, 'carro.html')
+
+
+def devoluciones_view(request):
+    return render(request, 'devoluciones.html')

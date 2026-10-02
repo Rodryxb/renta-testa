@@ -7,7 +7,14 @@
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto px-4 py-12">
+<div class="max-w-7xl mx-auto px-4 pt-4">
+    <div id="error-stock-container" class="hidden mb-6 bg-red-100 border-l-4 border-red-600 text-red-800 p-5 rounded-r-xl shadow-md font-medium text-lg flex items-start gap-4">
+        <i class="fa-solid fa-triangle-exclamation text-2xl text-red-600 mt-1"></i>
+        <div id="error-stock-msg"></div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex flex-col lg:flex-row gap-8">
         
         <!-- Lista de Items -->
@@ -61,6 +68,24 @@
                 </button>
                 <p class="text-xs text-center text-gray-400"><i class="fa-solid fa-lock text-brandYellow"></i> Transacción 100% segura y encriptada.</p>
             </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Confirmar Eliminación -->
+<div id="modal-delete" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden text-center transform transition-all">
+        <div class="bg-red-50 p-6 border-b border-red-100">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <i class="fa-solid fa-trash-can text-3xl text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Quitar Artículo</h3>
+            <p class="text-sm text-gray-500">¿Estás seguro de que deseas quitar este ítem de tu carro de compras?</p>
+        </div>
+        <div class="p-4 flex gap-3 justify-center bg-gray-50">
+            <button onclick="cerrarModalDelete()" class="w-1/2 bg-white text-gray-700 font-bold py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-100 transition shadow-sm">Cancelar</button>
+            <button onclick="ejecutarEliminacion()" class="w-1/2 bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition shadow-sm">Sí, quitar</button>
         </div>
     </div>
 </div>
@@ -300,17 +325,30 @@
         }
     }
 
-    async function eliminarItem(id) {
-        if(!confirm('¿Quitar este ítem de tu compra?')) return;
+    let itemToDelete = null;
+
+    function eliminarItem(id) {
+        itemToDelete = id;
+        document.getElementById('modal-delete').classList.remove('hidden');
+    }
+
+    function cerrarModalDelete() {
+        itemToDelete = null;
+        document.getElementById('modal-delete').classList.add('hidden');
+    }
+
+    async function ejecutarEliminacion() {
+        if(!itemToDelete) return;
         
         const token = localStorage.getItem('access_token');
         const res = await fetch(`/api/carro-arriendo/`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ item_id: id })
+            body: JSON.stringify({ item_id: itemToDelete })
         });
         
         if(res.ok) {
+            cerrarModalDelete();
             showToast('Ítem eliminado del carro.');
             loadCart();
         }
@@ -391,7 +429,11 @@
                     badge.classList.add('hidden');
                 }
             } else {
-                alert(data.error || 'Ocurrió un error al procesar el pago.');
+                cerrarModalPago();
+                const errDiv = document.getElementById('error-stock-container');
+                document.getElementById('error-stock-msg').innerHTML = '<strong>Transacción Rechazada:</strong><br>' + (data.error || 'Error al procesar el pago.');
+                errDiv.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } catch(error) {
             alert('Error de conexión.');

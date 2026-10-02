@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-gray-100 min-h-screen py-10">
+    <div class="max-w-5xl mx-auto px-4">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-extrabold text-brandBlack"><i class="fa-solid fa-clock-rotate-left text-brandYellow mr-3"></i> Mis Devoluciones Activas</h1>
+            <a href="/maquinas/" class="text-sm font-bold text-gray-500 hover:text-brandYellow transition">&larr; Volver al catálogo</a>
+        </div>
+
+        <div id="devoluciones-container" class="space-y-4">
+            <!-- Loading spinner -->
+            <div class="text-center py-20 text-gray-400" id="loading-spinner">
+                <i class="fa-solid fa-spinner fa-spin text-4xl mb-3"></i>
+                <p>Cargando tus agendas...</p>
+            </div>
+        </div>
+
+        <!-- Botón de Soporte -->
+        <div class="mt-12 text-center">
+            <button onclick="openDanoModal()" class="bg-white text-gray-700 hover:text-brandBlack border-2 border-gray-200 hover:border-red-500 font-bold py-3 px-8 rounded-full shadow hover:shadow-lg transition transform hover:-translate-y-1">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 mr-2"></i> ¿Tu producto ha llegado dañado?
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Daño / Soporte -->
+<div id="modal-dano" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative">
+        <button onclick="closeDanoModal()" class="absolute top-4 right-4 text-gray-200 hover:text-white transition z-10"><i class="fa-solid fa-xmark text-2xl"></i></button>
+        <div class="bg-red-600 p-6 text-center text-white relative">
+            <i class="fa-solid fa-car-burst text-5xl mb-3"></i>
+            <h3 class="text-2xl font-black">¡Contáctanos de inmediato!</h3>
+            <p class="text-red-100 mt-1 font-medium"><i class="fa-solid fa-envelope mr-1"></i> devolucion@material.com</p>
+        </div>
+        <form onsubmit="enviarReporte(event)" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nombres Completos</label>
+                <input type="text" required placeholder="Ej. Juan Pérez" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-red-500 outline-none">
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="w-full sm:w-1/2">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico</label>
+                    <input type="email" required placeholder="correo@empresa.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+                <div class="w-full sm:w-1/2">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Teléfono</label>
+                    <input type="tel" required placeholder="+56 9 1234 5678" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Número de orden</label>
+                <input type="number" required placeholder="Ej. 1" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-red-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Adjunta las evidencias por favor</label>
+                <input type="file" required accept="image/*,video/*" multiple class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-red-500 outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                <p class="text-xs text-gray-400 mt-1">Puedes seleccionar varias fotos o videos cortos.</p>
+            </div>
+            <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 transition shadow-lg mt-2">
+                <i class="fa-solid fa-paper-plane mr-2"></i> Enviar Evidencias
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    function openDanoModal() {
+        document.getElementById('modal-dano').classList.remove('hidden');
+    }
+    
+    function closeDanoModal() {
+        document.getElementById('modal-dano').classList.add('hidden');
+    }
+    
+    function enviarReporte(e) {
+        e.preventDefault();
+        alert('¡Tus evidencias han sido enviadas a devolucion@material.com!\nNuestro equipo de siniestros se pondrá en contacto contigo en las próximas 2 horas hábiles.');
+        closeDanoModal();
+        e.target.reset();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('access_token');
+        if(!token) {
+            document.getElementById('devoluciones-container').innerHTML = `
+                <div class="bg-white p-10 rounded-2xl shadow-lg text-center border-t-4 border-brandYellow">
+                    <i class="fa-solid fa-lock text-6xl text-gray-300 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-brandBlack mb-2">Inicia Sesión</h2>
+                    <p class="text-gray-500 mb-6">Debes iniciar sesión para ver tus maquinarias agendadas.</p>
+                    <a href="/auth/" class="bg-brandBlack text-brandYellow font-bold px-6 py-3 rounded-lg hover:bg-gray-800 transition">Ir al Login</a>
+                </div>`;
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/mis-devoluciones/', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if(res.status === 401) {
+                localStorage.clear();
+                window.location.href = '/auth/?expired=true';
+                return;
+            }
+
+            const data = await res.json();
+            const container = document.getElementById('devoluciones-container');
+
+            if(data.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-10 rounded-2xl shadow-lg text-center">
+                        <i class="fa-solid fa-box-open text-6xl text-gray-200 mb-4"></i>
+                        <h2 class="text-xl font-bold text-gray-600">No tienes maquinarias arrendadas</h2>
+                        <p class="text-gray-400">Tus agendas aparecerán aquí una vez que realices el pago de una maquinaria.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                let badgeColor = 'bg-brandBlack text-brandYellow';
+                if(item.estado_dias.includes('Atrasado')) badgeColor = 'bg-red-600 text-white';
+                else if(item.estado_dias.includes('envío')) badgeColor = 'bg-blue-500 text-white';
+                
+                html += `
+                    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition border-l-4 border-brandYellow flex flex-col md:flex-row items-center gap-6">
+                        <div class="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border">
+                            <img src="${item.imagen || 'https://via.placeholder.com/150'}" alt="${item.maquinaria}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="text-xl font-extrabold text-brandBlack mb-1">${item.maquinaria}</h3>
+                            <p class="text-sm text-gray-500 mb-2"><i class="fa-solid fa-file-invoice text-gray-400 mr-1"></i> Orden / Contrato #${item.contrato_id}</p>
+                            <div class="flex gap-4 text-sm font-medium">
+                                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded"><i class="fa-regular fa-calendar-check text-green-500 mr-1"></i> Inicio: ${item.fecha_inicio}</span>
+                                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded"><i class="fa-regular fa-calendar-xmark text-red-500 mr-1"></i> Fin: ${item.fecha_fin}</span>
+                            </div>
+                        </div>
+                        <div class="text-right mt-4 md:mt-0">
+                            <div class="inline-block ${badgeColor} font-bold text-lg px-5 py-2 rounded-lg shadow">
+                                <i class="fa-solid fa-clock mr-1"></i> ${item.estado_dias}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+        } catch (error) {
+            document.getElementById('devoluciones-container').innerHTML = `<div class="p-4 bg-red-100 text-red-700 rounded">Error de conexión al cargar agendas.</div>`;
+        }
+    });
+</script>
+{% endblock %}

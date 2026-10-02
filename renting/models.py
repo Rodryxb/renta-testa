@@ -149,7 +149,7 @@ class ServicioExterno(models.Model):
 class Configuracion(models.Model):
     banner_url = models.URLField(max_length=500, blank=True, null=True)
     titulo_banner = models.CharField(max_length=200, default="Espacio para Banner E-Commerce")
-    titulo_principal = models.CharField(max_length=200, default="Renta testa.")
+    titulo_principal = models.CharField(max_length=200, default="Renta Testa")
     subtitulo_principal = models.TextField(default="Maquinarias de última generación, asesorías y materiales.")
     
     # Patrón Singleton: Asegura que siempre exista solo 1 registro de configuración

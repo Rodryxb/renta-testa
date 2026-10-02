@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ConfiguracionView, MaquinariaViewSet, RegistroClienteView, CarroArriendoView, CheckoutView, MisContratosView, ContratoEstadoView, ServicioExternoViewSet
+from .views import ConfiguracionView, DevolucionesActivasView, MaquinariaViewSet, RegistroClienteView, CarroArriendoView, CheckoutView, MisContratosView, ContratoEstadoView, ServicioExternoViewSet
 from .serializers import CustomTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('carro-arriendo/', CarroArriendoView.as_view(), name='carro-arriendo'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('mis-contratos/', MisContratosView.as_view(), name='mis-contratos'),
+    path('mis-devoluciones/', DevolucionesActivasView.as_view(), name='mis-devoluciones'),
     path('configuracion/', ConfiguracionView.as_view(), name='configuracion'),
     path('contratos/<int:pk>/estado/', ContratoEstadoView.as_view(), name='contrato-estado'),
 ]
