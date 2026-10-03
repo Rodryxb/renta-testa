@@ -63,7 +63,7 @@
                     <span class="text-4xl font-extrabold text-green-600" id="resumen-total">$0</span>
                 </div>
 
-                <button onclick="abrirModalPago()" class="w-full bg-brandYellow text-brandBlack font-extrabold py-4 rounded-xl hover:bg-yellow-400 transition shadow-xl text-lg transform hover:-translate-y-1 mb-3">
+                <button id="btn-pagar" onclick="abrirModalPago()" class="w-full bg-brandYellow text-brandBlack font-extrabold py-4 rounded-xl hover:bg-yellow-400 transition shadow-xl text-lg transform hover:-translate-y-1 mb-3">
                     <i class="fa-solid fa-credit-card mr-2"></i> IR A PAGAR
                 </button>
                 <p class="text-xs text-center text-gray-400"><i class="fa-solid fa-lock text-brandYellow"></i> Transacción 100% segura y encriptada.</p>
@@ -214,12 +214,15 @@
         let subMateriales = 0;
         let fletes = 0;
         let garantias = 0;
+        let hasGlobalError = false;
 
         items.forEach(item => {
             const maq = item.maquinaria_detalle; // CORRECCIÓN CLAVE
             if(!maq) return;
 
             const isMaq = maq.tipo === 'MAQUINARIA';
+            const hasStockError = maq.stock_disponible < item.cantidad;
+            if(hasStockError) hasGlobalError = true;
             
             // Calculos internos para el resumen visual
             let totalItem = 0;
@@ -268,6 +271,16 @@
                         </div>
                         <h4 class="text-lg font-bold text-brandBlack mb-2">${maq.nombre}</h4>
                         
+                        ${hasStockError ? `
+                            <div class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 font-medium flex gap-3 items-start">
+                                <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+                                <div>
+                                    <p><b>Stock insuficiente:</b> Solo tienes ${maq.stock_disponible} unid. disponible(s) actualmente.</p>
+                                    ${maq.proxima_fecha_disponible ? `<p class="mt-1">Próxima unidad disponible estimada para el <b>${maq.proxima_fecha_disponible}</b>.</p>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
                         <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-2 items-center">
                             ${isMaq ? `
                                 <div><i class="fa-regular fa-calendar text-brandYellow w-5"></i> <b>Fechas:</b> <br> ${item.fecha_inicio} al ${item.fecha_fin}</div>
@@ -292,6 +305,22 @@
         });
 
         updateResumen(subArriendos, subMateriales, fletes, garantias);
+
+        const btnPagar = document.getElementById('btn-pagar');
+        if(btnPagar) {
+            if(hasGlobalError) {
+                btnPagar.disabled = true;
+                btnPagar.classList.add('opacity-50', 'cursor-not-allowed');
+                btnPagar.innerHTML = '<i class="fa-solid fa-ban mr-2"></i> REVISA TU STOCK';
+                // Evitar que el onclick funcione usando CSS pointer-events
+                btnPagar.style.pointerEvents = 'none'; 
+            } else {
+                btnPagar.disabled = false;
+                btnPagar.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnPagar.innerHTML = '<i class="fa-solid fa-credit-card mr-2"></i> IR A PAGAR';
+                btnPagar.style.pointerEvents = 'auto';
+            }
+        }
     }
 
     function updateResumen(arr, mat, flete, gar) {

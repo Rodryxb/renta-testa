@@ -19,7 +19,7 @@
         <!-- Lado Izquierdo: Imagen e Info Principal -->
         <div class="lg:w-3/5">
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8 flex justify-center items-center h-[400px]">
-                <img src="{% if producto.imagen_url %}{% if producto.imagen_upload %}{{ producto.imagen_upload.url }}{% else %}{{ producto.imagen_url }}{% endif %}{% else %}https://via.placeholder.com/800x600?text=Sin+Imagen{% endif %}" alt="{{ producto.nombre }}" class="max-h-full object-contain drop-shadow-2xl">
+                <img src="{% if producto.imagen_upload %}{{ producto.imagen_upload.url }}{% elif producto.imagen_url %}{{ producto.imagen_url }}{% else %}https://via.placeholder.com/800x600?text=Sin+Imagen{% endif %}" alt="{{ producto.nombre }}" class="max-h-full object-contain drop-shadow-2xl">
             </div>
             
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">

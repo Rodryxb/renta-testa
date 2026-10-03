@@ -44,6 +44,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class MaquinariaSerializer(serializers.ModelSerializer):
     imagen_final = serializers.SerializerMethodField()
+    proxima_fecha_disponible = serializers.SerializerMethodField()
 
     class Meta:
         model = Maquinaria
@@ -51,9 +52,22 @@ class MaquinariaSerializer(serializers.ModelSerializer):
 
     def get_imagen_final(self, obj):
         if obj.imagen_upload:
-            # Retornar ruta relativa para que funcione detrás de Proxies (Ngrok/DevTunnels)
             return obj.imagen_upload.url
         return obj.imagen_url
+
+    def get_proxima_fecha_disponible(self, obj):
+        if obj.stock_disponible > 0:
+            return None
+        if obj.tipo == 'MAQUINARIA':
+            from .models import ItemContrato
+            siguiente = ItemContrato.objects.filter(
+                maquinaria=obj,
+                contrato__estado__in=['PAGADO', 'ENTREGADO']
+            ).order_by('fecha_fin').first()
+            if siguiente and siguiente.fecha_fin:
+                from datetime import timedelta
+                return (siguiente.fecha_fin + timedelta(days=1)).strftime('%d/%m/%Y')
+        return None
 
 class ItemCarroSerializer(serializers.ModelSerializer):
     dias = serializers.ReadOnlyField()
