@@ -98,4 +98,4 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Proyecto 6 Backend. Alumno: [Rodrigo Bastian Castro Sandoval], Sección: [AP-N4-C1], Año: 2026.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-}\n
+}
