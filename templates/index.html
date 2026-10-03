@@ -1,22 +1,230 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Arriendo de Maquinaria</title>
-    <style>
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-        .content { flex: 1; padding: 20px; text-align: center; }
-        footer { background-color: #333; color: white; text-align: center; padding: 10px; }
-    </style>
-</head>
-<body>
-    <div class="content">
-        <h1>API de Arriendo de Maquinaria de Construcción</h1>
-        <p>Bienvenido. Por favor visite la <a href="/api/docs/">Documentación de la API (Swagger)</a> para explorar los endpoints.</p>
+{% extends 'base.html' %}
+{% block content %}
+<!-- Botón Flotante para Admin (Oculto por defecto) -->
+<button id="btn-edit-inline" onclick="openInlineEdit()" class="hidden fixed bottom-8 right-8 z-50 bg-brandBlack text-brandYellow font-bold px-6 py-3 rounded-full shadow-2xl hover:bg-gray-800 transition transform hover:scale-105 border-2 border-brandYellow">
+    <i class="fa-solid fa-pen-to-square mr-2"></i> Editar Diseño Portada
+</button>
+
+<div class="text-center py-16 px-4 bg-gray-50 relative group">
+    <h1 id="main-title" class="text-5xl md:text-6xl font-extrabold text-brandBlack mb-4 transition">Renta Testa</h1>
+    <p id="main-subtitle" class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light transition">
+        Maquinarias de última generación, asesorías y materiales minoristas y mayoristas.
+    </p>
+</div>
+
+<!-- Banner Dinámico -->
+<div class="max-w-[1200px] mx-auto px-4 pb-16 relative">
+    <div id="banner-container" class="w-full h-[400px] bg-gradient-to-r from-gray-800 to-brandBlack rounded-2xl border-8 border-[#1a1a1a] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col items-center justify-center relative overflow-hidden group bg-cover bg-center">
+        <div class="z-10 text-center bg-black bg-opacity-50 p-6 rounded-lg backdrop-blur-sm transition-all" id="banner-text-box">
+            <i class="fa-solid fa-camera text-6xl text-brandMetallic mb-4 group-hover:scale-110 transition duration-500"></i>
+            <h2 class="text-3xl font-bold text-white mb-2" id="banner-title">Espacio para Banner E-Commerce</h2>
+            <p class="text-brandYellow font-medium">1200 × 400 píxeles</p>
+        </div>
+        <div class="absolute inset-0 bg-brandMetallic opacity-10 mix-blend-overlay"></div>
+        <!-- Sombra interna (Vignette) para bordes matte -->
+        <div class="absolute inset-0 shadow-[inset_0_0_80px_rgba(0,0,0,0.8)] pointer-events-none"></div>
     </div>
-    <!-- FOOTER: Datos del Alumno requeridos en rúbrica -->
-    <footer>
-        <p>Alumno: <b>[Rodrigo Bastian Castro Sandoval]</b> | Sección: <b>[AP-N4-C1]</b> | Año: <b>2026</b></p>
-    </footer>
-</body>
-</html>\n
+</div>
+
+<!-- Propuesta de Valor / Mensaje de Confianza -->
+<div class="max-w-4xl mx-auto px-6 text-center mb-12 transform hover:scale-105 transition duration-500">
+    <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-t-4 border-brandYellow relative overflow-hidden">
+        <i class="fa-solid fa-quote-left absolute top-4 left-6 text-6xl text-gray-100"></i>
+        <h3 class="text-2xl md:text-3xl font-extrabold text-brandBlack mb-4">Compromiso y Respaldo Técnico</h3>
+        <p class="text-gray-600 leading-relaxed text-lg font-medium">
+            "Nuestro ambicioso proyecto busca potenciar a aquellos profesionales de la construcción. En <span class="font-bold text-brandBlack">Renta Testa</span> no solo entregamos herramientas; construimos un lazo de absoluta confianza brindando equipos de última generación, mantenimiento riguroso y un soporte logístico impecable en cada obra. Tu éxito y seguridad en el terreno son nuestra prioridad."
+        </p>
+        <div class="mt-6 flex justify-center items-center gap-2 text-brandYellow text-xl">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+        </div>
+    </div>
+</div>
+
+<div class="text-center pb-20">
+    <a href="/maquinas/" class="inline-block bg-brandYellow text-brandBlack font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:bg-yellow-400 hover:-translate-y-1 transition transform">
+        Ver Catálogo de Arriendo <i class="fa-solid fa-arrow-right ml-2"></i>
+    </a>
+</div>
+
+
+<!-- Barra de Información -->
+<div class="bg-brandBlack text-white border-b-4 border-brandYellow shadow-lg relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap justify-center md:justify-around items-center py-5 gap-6 text-sm">
+            <button onclick="openInfoModal('origen')" class="hover:text-brandYellow transition font-bold flex items-center gap-2 transform hover:scale-105">
+                <i class="fa-solid fa-code text-lg"></i> Origen
+            </button>
+            <button onclick="openInfoModal('trabaja')" class="hover:text-brandYellow transition font-bold flex items-center gap-2 transform hover:scale-105">
+                <i class="fa-solid fa-briefcase text-lg"></i> Trabaja con nosotros
+            </button>
+            <button onclick="openInfoModal('ubicacion')" class="hover:text-brandYellow transition font-bold flex items-center gap-2 transform hover:scale-105">
+                <i class="fa-solid fa-location-dot text-lg"></i> Ubicación
+            </button>
+            <button onclick="openInfoModal('soporte')" class="hover:text-brandYellow transition font-bold flex items-center gap-2 transform hover:scale-105">
+                <i class="fa-solid fa-headset text-lg"></i> Área de soporte
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edición Inline -->
+<div id="modal-inline-edit" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 relative">
+        <button onclick="closeInlineEdit()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <h3 class="text-2xl font-bold text-brandBlack mb-6 border-b pb-2"><i class="fa-solid fa-pen-to-square text-brandYellow mr-2"></i> Editar Portada Principal</h3>
+        <form onsubmit="saveInlineEdit(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700">Título Principal</label>
+                <input type="text" id="edit-titulo-p" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-brandYellow">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700">Subtítulo Explicativo</label>
+                <textarea id="edit-subtitulo-p" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-brandYellow" rows="3"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700">URL Foto del Banner (1200x400)</label>
+                <input type="url" id="edit-banner-url" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-brandYellow" placeholder="https://...">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700">Texto del Banner (Si no hay foto)</label>
+                <input type="text" id="edit-banner-tit" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-brandYellow">
+            </div>
+            <button type="submit" class="w-full bg-brandYellow text-brandBlack font-bold py-3 rounded-lg hover:bg-yellow-400 transition shadow-lg text-lg">Guardar Cambios en Vivo</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // 1. Cargar datos desde la API
+        const res = await fetch('/api/configuracion/');
+        const data = await res.json();
+        
+        if(data.titulo_principal) document.getElementById('main-title').innerText = data.titulo_principal;
+        if(data.subtitulo_principal) document.getElementById('main-subtitle').innerText = data.subtitulo_principal;
+        
+        if(data.banner_url) {
+            document.getElementById('banner-container').style.backgroundImage = `url('${data.banner_url}')`;
+            document.getElementById('banner-text-box').classList.add('hidden');
+        } else {
+            document.getElementById('banner-title').innerText = data.titulo_banner || 'Espacio para Banner E-Commerce';
+        }
+
+        // 2. Verificar si es Superusuario para mostrar botón de edición en vivo
+        const rol = localStorage.getItem('user_rol');
+        if(rol === 'EJECUTIVO') {
+            document.getElementById('btn-edit-inline').classList.remove('hidden');
+        }
+    });
+
+    async function openInlineEdit() {
+        const res = await fetch('/api/configuracion/');
+        const data = await res.json();
+        document.getElementById('edit-titulo-p').value = data.titulo_principal || 'Renta testa.';
+        document.getElementById('edit-subtitulo-p').value = data.subtitulo_principal || 'Maquinarias de última generación, asesorías y materiales minoristas y mayoristas.';
+        document.getElementById('edit-banner-url').value = data.banner_url || '';
+        document.getElementById('edit-banner-tit').value = data.titulo_banner || 'Espacio para Banner E-Commerce';
+        
+        document.getElementById('modal-inline-edit').classList.remove('hidden');
+    }
+
+    function closeInlineEdit() {
+        document.getElementById('modal-inline-edit').classList.add('hidden');
+    }
+
+    async function saveInlineEdit(e) {
+        e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        const payload = {
+            titulo_principal: document.getElementById('edit-titulo-p').value,
+            subtitulo_principal: document.getElementById('edit-subtitulo-p').value,
+            banner_url: document.getElementById('edit-banner-url').value,
+            titulo_banner: document.getElementById('edit-banner-tit').value
+        };
+        const res = await fetch('/api/configuracion/', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        if(res.ok) {
+            window.location.reload(); // Recarga para aplicar los cambios de inmediato
+        } else {
+            alert('Permiso denegado o sesión expirada.');
+        }
+    }
+</script>
+
+    <!-- Modal Dinámico de Información -->
+    <div id="info-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300 opacity-0" onclick="closeInfoModal(event)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 relative border-t-8 border-brandYellow" onclick="event.stopPropagation()">
+            <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <div class="p-8 text-center">
+                <div id="info-modal-icon" class="text-6xl text-brandBlack mb-6 drop-shadow-md"></div>
+                <h3 id="info-modal-title" class="text-2xl font-black text-brandBlack mb-4"></h3>
+                <div id="info-modal-content" class="text-gray-600 leading-relaxed text-sm md:text-base"></div>
+            </div>
+            <div class="bg-gray-50 px-8 py-4 rounded-b-2xl border-t border-gray-100 flex justify-center">
+                <button onclick="closeInfoModal()" class="bg-brandBlack text-brandYellow font-bold px-10 py-3 rounded-lg hover:bg-gray-900 transition shadow-md w-full">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const infoData = {
+            'origen': {
+                title: 'El Origen del Proyecto',
+                icon: '<i class="fa-solid fa-graduation-cap text-brandYellow"></i>',
+                content: 'Renta Testa nació como un ambicioso proyecto de evaluación práctica para la asignatura de <b>Desarrollo Backend y Frontend</b>.<br><br>Su objetivo principal es demostrar la destreza técnica en la integración de arquitecturas Django, bases de datos complejas y el diseño de interfaces interactivas para E-Commerce.'
+            },
+            'trabaja': {
+                title: 'Trabaja con Nosotros',
+                icon: '<i class="fa-solid fa-envelope-open-text text-brandYellow"></i>',
+                content: '¿Te apasiona el mundo de la maquinaria pesada y la tecnología?<br><br>Únete a nuestro equipo. Envía tu currículum directamente a nuestro equipo de reclutamiento escribiendo a:<br><br><a href="mailto:rentatesta@postula.cl" class="text-xl font-bold text-brandBlack hover:text-brandYellow transition block mt-2">rentatesta@postula.cl</a>'
+            },
+            'ubicacion': {
+                title: 'Nuestra Ubicación',
+                icon: '<i class="fa-solid fa-map-location-dot text-brandYellow"></i>',
+                content: 'Nuestra base central de operaciones tecnológicas y estacionamiento de maquinarias se encuentra en:<br><br><span class="font-bold text-brandBlack text-lg block mt-2">Sede INACAP Temuco</span>Av. Luis Durand 02150<br>Temuco, Región de La Araucanía, Chile.'
+            },
+            'soporte': {
+                title: 'Área de Soporte',
+                icon: '<i class="fa-solid fa-life-ring text-brandYellow"></i>',
+                content: '¿Tienes dudas sobre un contrato de arriendo o necesitas asistencia técnica urgente en faena?<br><br>Nuestro equipo de soporte está disponible para ti escribiendo a:<br><br><a href="mailto:rentatesta@soporte.com" class="text-xl font-bold text-brandBlack hover:text-brandYellow transition block mt-2">rentatesta@soporte.com</a>'
+            }
+        };
+
+        function openInfoModal(type) {
+            const modal = document.getElementById('info-modal');
+            const data = infoData[type];
+            
+            document.getElementById('info-modal-icon').innerHTML = data.icon;
+            document.getElementById('info-modal-title').innerText = data.title;
+            document.getElementById('info-modal-content').innerHTML = data.content;
+            
+            modal.classList.remove('hidden');
+            // Trigger reflow for animation
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            modal.children[0].classList.remove('scale-95');
+            modal.children[0].classList.add('scale-100');
+        }
+
+        function closeInfoModal(e) {
+            if(e && e.target.id !== 'info-modal' && !e.target.closest('button')) return;
+            const modal = document.getElementById('info-modal');
+            modal.classList.add('opacity-0');
+            modal.children[0].classList.remove('scale-100');
+            modal.children[0].classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+
+{% endblock %}
